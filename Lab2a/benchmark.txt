@@ -1,0 +1,23 @@
+fixed size array:
+Count:	Creating	Remove(Count/10, from the beginning)	Remove(Count/10, from the end)	Remove(Count/10, from the middle)	Insert(Count/10, in the beginning)	Insert(Count/10, in the end)	Insert(Count/10, in the middle)		Get(Count/100, randomly)	Set(Count/100, randomly)	Pop back(Count/100)	Pop front(Count/1000)	Append(Count/100)	Push front(Count/1000)
+1000	0			0					0					0					0					0				0			0					0			0			0			0			0
+10000	0			0					0					0					0					0				0			0					0			0			0			0			1
+100000	1			0					0					0					1					0				0			0					0			0			41			0			40
+1000000	13			0					1					0					3					1				2			1					2			0			3984			1			4014
+changed size array:
+Count:		Creating	Remove(Count/10, from the beginning)	Remove(Count/10, from the end)	Remove(Count/10, from the middle)	Insert(Count/10, in the beginning)	Insert(Count/10, in the end)	Insert(Count/10, in the middle)		Get(Count/10, randomly)	Set(Count/10, randomly)	Pop back(Count/10)	Pop front(Count/10)	Append(Count/10)	Push front(Count/10)
+1000	1			0					1					0					0					0				0			0					0			0			0			0			1
+10000	10			1					0					2					1					0				3			0					1			1			0			1			1
+100000	97			6					6					14					6					6				28			5					7			6			6			7			7
+1000000	980			58					52					149					65					57				266			57					65			58			66			69			68
+Double-linked list:
+Count:	Creating		Get(Count/10, randomly)	Set(Count/10, randomly)	Pop back(Count/10)	Pop front(Count/10)	Append(Count/10)	Push front(Count/10)	Remove(Count/100, from the beginning)	Remove(Count/100, from the end)	Remove(Count/100, from the middle)	Insert(Count/100, in the beginning)	Insert(Count/100, in the end)	Insert(Count/100, in the middle)
+1000	1			0				0			0			0			0			0			0					0					0					0				0				0
+10000	2			33				35			0			0			0			0			0					8					3					0				8				3
+100000	22			1244				1223			2			2			2			2			0					1324					449					1				1282				442
+200000	45			2547				2525			3			4			4			5			0					10431					2552					1				10438				2476
+Another dynamic list:
+Count:	Creating		Get(Count/10, randomly)		Set(Count/10, randomly)	Pop back(Count/10)	Pop front(Count/10)	Append(Count/10)	Push front(Count/10)	Remove(Count/100, from the beginning)	Remove(Count/100, from the end)	Remove(Count/100, from the middle)	Insert(Count/100, in the beginning)	Insert(Count/100, in the end)	Insert(Count/100, in the middle)
+1000	0					0			0			1			0			1			1			0					0					0					0			0			0
+10000	0					0			1			55			73			68			69			0					0					0					0			0			0
+100000	2					1			1			14168			12623			12572			14863			1					1					1					2			1			2
