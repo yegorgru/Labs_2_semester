@@ -1688,7 +1688,6 @@ void benchmark() {
 	std::cout << "In process...\n";
 	std::ofstream benchm;
 	benchm.open("benchmark.txt");
-	
 	benchm << "Count:\tSearch by string in end\tSearch by units and min expiration date\tSearch by dates\tSave in txt:\tSave in bin:\tRead from txt\tRead from bin\tSize of txt\tSize of bin\tSorting units with quicksort\tSorting units with counting sort\tSorting exp. date with quicksort\tSorting exp.date with radix sort\tSorting all fields with quicksort\tSorting all fields with not comparison sorts\n";
 	int Time = 0;
 	int count = 100;
@@ -2027,7 +2026,7 @@ void counting_sort(std::deque<goods>& all_goods,size_t begin,size_t end)
 void radix_sort(std::deque<goods>& all_goods, size_t begin, size_t end)
 {
 	int current_plus1,current,index, temp;
-	std::deque<goods> pocket[10];
+	std::list<goods> pocket[10];
 	for (int i = 0; i < 4; i++) {
 		current_plus1 = pow(10, i + 1);
 		current = pow(10, i);
@@ -2036,11 +2035,11 @@ void radix_sort(std::deque<goods>& all_goods, size_t begin, size_t end)
 			index = temp / current;
 			pocket[index].push_back(all_goods[j]);
 		}
-		int count = begin;
+		size_t count = begin;
 		for (size_t j = 0; j < 10; j++) {
 			while (!pocket[j].empty()) {
 				all_goods[count] = *(pocket[j].begin());
-				pocket[j].erase(pocket[j].begin());
+				pocket[j].pop_front();
 				count++;
 			}
 		}
