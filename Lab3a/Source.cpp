@@ -236,15 +236,15 @@ void benchmark_big_piece(point* Array, int quick_threshold, int merge_threshold,
 {
 	benchm << "Insertion sort\nCount\t\tTime (ms)\n";
 	benchmark_piece(Array, 0, benchm, insertion_sort, 0, 0, 0,0);
-	benchm << "Quicksort\n\Count\t\tTime (ms)\n";
+	benchm << "Quicksort\nCount\t\tTime (ms)\n";
 	benchmark_piece(Array, 0, benchm, quicksort, 0, 0, 0,0);
-	benchm << "Mergesort\n\Count\t\tTime (ms)\n";
+	benchm << "Mergesort\nCount\t\tTime (ms)\n";
 	benchmark_piece(Array, 0, benchm,0, mergesort, 0, 0,0);
-	benchm << "Library sort\n\Count\t\tTime (ms)\n";
+	benchm << "Library sort\nCount\t\tTime (ms)\n";
 	benchmark_piece(Array, 0, benchm, 0, 0, 0, 0, library_sort);
-	benchm << "Combined quick and insertion sort\n\Count\t\tTime (ms)\n";
+	benchm << "Combined quick and insertion sort\nCount\t\tTime (ms)\n";
 	benchmark_piece(Array, quick_threshold, benchm, 0, 0, combined_quick_insertion_sort, 0,0);
-	benchm << "Combined merge and insertion sort\n\Count\t\tTime (ms)\n";
+	benchm << "Combined merge and insertion sort\nCount\t\tTime (ms)\n";
 	benchmark_piece(Array, merge_threshold, benchm, 0, 0,0, combined_merge_insertion_sort,0);
 }
 
@@ -338,6 +338,8 @@ void benchmark()
 
 	benchm << "\nAn almost sorted array\n";
 	point help;
+	quicksort(Array, 0, 999999,0);
+	copy(Array, 0, 1000000, for_copy);
 	for (int i = 0; i < 100; i++) {
 		size_t swap1 = mersenne() % 1000000;
 		size_t swap2 = mersenne() % 1000000;

@@ -145,10 +145,7 @@ void mergesort(T* Array, size_t n, bool demo)
 
 template <typename T>
 void library_sort(T* Array,size_t n) {
-	std::vector<T>vector_array;
-	for (size_t i = 0; i < n; i++) {
-		vector_array.push_back(Array[i]);
-	}
+	std::vector<T> vector_array(Array, Array + n);
 	sort(vector_array.begin(), vector_array.end());
 	for (size_t i = 0; i < n; i++) {
 		Array[i] = vector_array[i];
@@ -201,3 +198,4 @@ void demomode();
 void benchmark_piece(point* for_copy, int threshold, std::ofstream& benchm, void(*fooPointer1)(point* Array, size_t begin, size_t end,bool demo), void(*fooPointer2)(point* Array, size_t n, bool demo), void(*fooPointer3)(point* Array, size_t begin, size_t end, int threshold, bool demo), void(*fooPointer4)(point* Array, size_t n, int threshold, bool demo),void(*fooPointer5)(point* Array, size_t n));
 void benchmark_big_piece(point* Array, int quick_threshold, int merge_threshold, std::ofstream& benchm);
 void benchmark();
+

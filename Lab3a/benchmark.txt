@@ -1,186 +1,184 @@
 Choosing of ideal threshold for combined_quick_insertion_sort, length of array = 100000:
 Threshold	Time
-5		87
-10		81
-15		74
+5		89
+10		79
+15		73
 20		73
-25		74
-30		79
-35		77
-40		79
-45		81
-50		80
-55		79
-60		77
-65		82
-70		83
-16		70
-17		70
-18		76
-19		71
-20		76
-21		71
-22		80
-23		72
+25		80
+30		80
+35		84
+40		77
+45		94
+50		103
+55		93
+60		90
+65		97
+70		85
+11		84
+12		87
+13		102
+14		84
+15		83
+16		76
+17		91
+18		83
 Ideal threshold for combined_quick_insertion_sort: 16
 
 Choosing of ideal threshold for combined_merge_insertion_sort, length of array = 100000:
 Threshold	Time
-5		123
-10		119
-15		116
+5		125
+10		123
+15		120
 20		118
-25		120
-30		115
-35		121
-40		138
-45		117
-50		128
-55		123
-60		125
-65		125
-70		134
-26		115
-27		118
-28		118
-29		116
-30		116
-31		117
-32		116
-33		116
-Ideal threshold for combined_merge_insertion_sort: 26
+25		125
+30		117
+35		118
+40		127
+45		121
+50		139
+55		127
+60		124
+65		140
+70		131
+26		130
+27		123
+28		120
+29		114
+30		114
+31		116
+32		134
+33		149
+Ideal threshold for combined_merge_insertion_sort: 29
 
 Random array
 Insertion sort
 Count		Time (ms)
 100		0
 1000		6
-10000		609
-20000		2406
-40000		9677
-80000		38970
+10000		654
+20000		2530
+40000		9961
+80000		40344
 Quicksort
-Count		Time (ms)
-100		0
-1000		0
-10000		8
-100000		91
-1000000		1094
-Mergesort
 Count		Time (ms)
 100		0
 1000		1
 10000		10
-100000		130
-1000000		1575
-Library sort
+100000		102
+1000000		1242
+Mergesort
 Count		Time (ms)
 100		1
-1000		2
-10000		30
-100000		366
-1000000		4181
+1000		0
+10000		12
+100000		162
+1000000		2098
+Library sort
+Count		Time (ms)
+100		0
+1000		3
+10000		33
+100000		410
+1000000		4316
 Combined quick and insertion sort
 Count		Time (ms)
 100		0
 1000		1
-10000		6
-100000		76
-1000000		873
+10000		7
+100000		72
+1000000		962
 Combined merge and insertion sort
 Count		Time (ms)
 100		0
-1000		1
-10000		10
-100000		113
-1000000		1418
+1000		0
+10000		9
+100000		114
+1000000		1455
 
 An almost sorted array
 Insertion sort
 Count		Time (ms)
 100		0
-1000		6
-10000		595
-20000		2401
-40000		9689
-80000		38892
+1000		0
+10000		0
+100000		30
+1000000		1804
 Quicksort
 Count		Time (ms)
 100		0
 1000		1
-10000		8
-100000		94
-1000000		1180
+10000		7
+100000		83
+1000000		959
 Mergesort
 Count		Time (ms)
 100		0
-1000		1
-10000		10
-100000		134
-1000000		1593
+1000		0
+10000		4
+100000		71
+1000000		902
 Library sort
 Count		Time (ms)
-100		1
-1000		2
-10000		31
-100000		383
-1000000		4199
+100		0
+1000		1
+10000		14
+100000		248
+1000000		2306
 Combined quick and insertion sort
 Count		Time (ms)
-100		0
+100		1
 1000		0
-10000		6
-100000		71
-1000000		901
+10000		5
+100000		75
+1000000		694
 Combined merge and insertion sort
 Count		Time (ms)
 100		0
 1000		1
-10000		9
-100000		114
-1000000		1396
+10000		3
+100000		65
+1000000		768
 
 An array, almost sorted in the opposite direction
 Insertion sort
 Count		Time (ms)
 100		0
-1000		6
-10000		602
-20000		2395
-40000		9698
-80000		38637
+1000		12
+10000		1449
+20000		5131
+40000		20407
 Quicksort
 Count		Time (ms)
 100		0
-1000		1
-10000		8
-100000		92
-1000000		1071
+1000		0
+10000		7
+100000		80
+1000000		1006
 Mergesort
 Count		Time (ms)
 100		0
-1000		1
-10000		11
-100000		129
-1000000		1562
+1000		0
+10000		9
+100000		123
+1000000		1350
 Library sort
 Count		Time (ms)
 100		0
 1000		2
-10000		31
-100000		369
-1000000		4200
+10000		16
+100000		262
+1000000		2555
 Combined quick and insertion sort
 Count		Time (ms)
 100		0
 1000		0
-10000		6
-100000		70
-1000000		851
+10000		5
+100000		66
+1000000		776
 Combined merge and insertion sort
 Count		Time (ms)
 100		0
-1000		1
+1000		0
 10000		9
-100000		118
-1000000		1399
+100000		103
+1000000		1305
