@@ -1,0 +1,77 @@
+Random array
+Heapsort:
+100		0
+1000		0
+10000		4
+100000		49
+1000000		654
+Library heapsort:
+100		0
+1000		1
+10000		11
+100000		130
+1000000		1632
+Binary tree sort:
+100		0
+1000		1
+10000		35
+100000		283
+1000000		2843
+Library quicksort :
+100		0
+1000		1
+10000		14
+100000		179
+1000000		2153
+
+An almost sorted array
+Heapsort:
+100		0
+1000		0
+10000		4
+100000		41
+1000000		540
+Library heapsort:
+100		0
+1000		0
+10000		10
+100000		123
+1000000		1477
+Binary tree sort:
+100		0
+1000		13
+10000		Already was stack overflow
+100000		Already was stack overflow
+1000000		Already was stack overflow
+Library quicksort :
+100		0
+1000		0
+10000		7
+100000		113
+1000000		935
+
+An array, almost sorted in the opposite direction
+Heapsort:
+100		0
+1000		0
+10000		4
+100000		40
+1000000		501
+Library heapsort:
+100		0
+1000		1
+10000		10
+100000		125
+1000000		1496
+Binary tree sort:
+100		0
+1000		8
+10000		Already was stack overflow
+100000		Already was stack overflow
+1000000		Already was stack overflow
+Library quicksort :
+100		0
+1000		1
+10000		6
+100000		110
+1000000		1268
