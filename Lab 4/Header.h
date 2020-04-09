@@ -444,6 +444,13 @@ class expTree {
 			left = nullptr;
 			right = nullptr;
 		}
+		Node(Node* other) {
+			this->name = other->name;
+			this->value = other->value;
+			parent = nullptr;
+			left = nullptr;
+			right = nullptr;
+		}
 	};
 
 	Node* root;
@@ -453,8 +460,25 @@ public:
 		root = nullptr;
 	}
 
+	expTree(const expTree& other) {
+		this->root = construct_subtree(this->root, other.root);
+	}
+
+	~expTree() {
+		delete_subtree(root);
+	}
+
 	double calculate() {
 		return calculation(root);
+	}
+
+	void show_min() {
+		if (root) {
+			show_min(root,0);
+		}
+		else {
+			std::cout << "Nothing" << std::endl;
+		}
 	}
 
 	void form_tree(std::string main_string);
@@ -476,6 +500,8 @@ public:
 	void fill_values(std::deque<double>& values,std::deque<std::string>& variables) {
 		if (root) {
 			fill_values(root, values,variables);
+			variables.clear();
+			values.clear();
 		}
 	}
 
@@ -483,6 +509,17 @@ public:
 		calc_simplification(root);
 	}
 private:
+	Node* construct_subtree(Node* node, Node* other_node)
+	{
+		node = new Node(other_node);
+		if (other_node->left) {
+			node->left = construct_subtree(node->left, other_node->left);
+		}
+		if (other_node->right) {
+			node->right = construct_subtree(node->right, other_node->right);
+		}
+		return node;
+	}
 	Node* form_subtree(Node* node, std::string for_form, size_t start, size_t end)
 	{
 		node = new Node("");
@@ -546,12 +583,16 @@ private:
 		}
 		return node;
 	}
+
+	void delete_subtree(Node*& node);
+
 	void calc_simplification(Node* node);
 	double calculation(Node* node);
 	//double plus_simplification(Node* node);
 	//double plus_simplification(Node* node, double& to_plus);
 
 	void show(Node* node);
+	void show_min(Node* node,int priority);
 	void fill(Node* node, std::deque<std::string>& variables);
 	void fill_values(Node* node,std::deque<double>& values, std::deque<std::string>& variables);
 	//void show_sign

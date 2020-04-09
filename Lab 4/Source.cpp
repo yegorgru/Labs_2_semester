@@ -159,6 +159,7 @@ void Tree<T>::show(Node* node)
 	}
 }
 
+
 template<class T>
 void Tree<T>::interactive_browsing(Node* node)
 {
@@ -366,7 +367,6 @@ void Tree<T>::count_posterity(Node* node, size_t& count)
 }
 
 
-
 void expTree::show(Node* node)
 {
 	if (node) {
@@ -376,6 +376,40 @@ void expTree::show(Node* node)
 			std::cout << node->name;
 			show(node->right);
 			std::cout << ')';
+		}
+		else if (node->name != "") {
+			std::cout << node->name;
+		}
+		else {
+			std::cout << node->value;
+		}
+	}
+}
+
+void expTree::show_min(Node* node, int priority)
+{
+	if (node) {
+		int pr = 0;
+		if (node->name == "+" || node->name == "-") {
+			pr = 1;
+		}
+		else if (node->name == "*" || node->name == "/") {
+			pr = 2;
+		}
+		else if (node->name == "^") {
+			pr = 3;
+		}
+		if (node->left && node->right && pr<priority) {
+			std::cout << '(';
+			show_min(node->left,pr);
+			std::cout << node->name;
+			show_min(node->right,pr);
+			std::cout << ')';
+		}
+		else if (node->left && node->right) {
+			show_min(node->left,pr);
+			std::cout << node->name;
+			show_min(node->right,pr);
 		}
 		else if (node->name != "") {
 			std::cout << node->name;
@@ -406,10 +440,11 @@ void expTree::fill(Node* node,std::deque<std::string>&variables)
 		fill(node->left,variables);
 		if (node->name == "") {
 			system("cls");
-			std::cout << "Enter next item" << std::endl;
+			std::cout << "Enter next item (marked x)" << std::endl;
 			node->name = 'x';
 			this->show();
 			std::cout << std::endl;
+			Sleep(5000);
 			int choise = 0;
 			int code;
 			do {
@@ -430,9 +465,29 @@ void expTree::fill(Node* node,std::deque<std::string>&variables)
 			} while (code != 13);
 			system("cls");
 			if (choise == 0) {
-				std::cout << "Enter name of variable" << std::endl;
-				std::getline(std::cin, node->name);
-				variables.push_back(node->name);
+				bool correct = false;
+				while (!correct) {
+					std::cout << "Enter name of variable" << std::endl;
+					std::getline(std::cin, node->name);
+					if (node->name != "+" && node->name != "-" && node->name != "*" && node->name != "/" && node->name != "^") {
+						correct = true;
+					}
+					else {
+						std::cout << "You can't name variable + - * / or ^" << std::endl;
+						Sleep(3000);
+						system("cls");
+					}
+				}
+				bool already_was = false;
+				for (size_t i = 0; i < variables.size(); i++) {
+					if (node->name == variables[i]) {
+						already_was = true;
+						break;
+					}
+				}
+				if (!already_was) {
+					variables.push_back(node->name);
+				}
 			}
 			else {
 				bool correct = false;
@@ -644,6 +699,22 @@ void add_brackets(std::string& to_return,size_t begin,size_t end) {
 	}
 }
 
+void expTree::delete_subtree(Node*& node)
+{
+	if (node) {
+		if (node->left) {
+			delete_subtree(node->left);
+		}
+		if (node->right) {
+			delete_subtree(node->right);
+		}
+		delete node;
+		node = nullptr;
+	}
+}
+
+
+
 double expTree::calculation(Node* node)
 {
 	if (node) {
@@ -682,34 +753,42 @@ double expTree::calculation(Node* node)
 void expTree::calc_simplification(Node* node)
 {
 	if (node) {
-		calc_simplification(node->left);
-		calc_simplification(node->right);
+		if (node->left&&(node->left->name == "+" || node->left->name == "-" || node->left->name == "*" || node->left->name == "/" || node->left->name == "^")) {
+			calc_simplification(node->left);
+		}
+		if (node->right&&(node->right->name == "+" || node->right->name == "-" || node->right->name == "*" || node->right->name == "/" || node->right->name == "^")) {
+			calc_simplification(node->right);
+		}
 		double l;
 		double r;
-		if (node->left->name == "" && node->right->name == "") {
-			l = node->left->value;
-			delete node->left;
-			r = node->right->value;
-			delete node->right;
-			if (node->name == "+") {
-				node->name = "";
-				node->value = l + r;
-			}
-			else if (node->name == "-") {
-				node->name = "";
-				node->value = l - r;
-			}
-			else if (node->name == "*") {
-				node->name = "";
-				node->value = l * r;
-			}
-			else if (node->name == "/") {
-				node->name = "";
-				node->value = l / r;
-			}
-			else if (node->name == "^") {
-				node->name = "";
-				node->value = pow(l, r);
+		if (node->left && node->right) {
+			if (node->left->name == "" && node->right->name == "") {
+				l = node->left->value;
+				delete node->left;
+				node->left = nullptr;
+				r = node->right->value;
+				delete node->right;
+				node->right = nullptr;
+				if (node->name == "+") {
+					node->name = "";
+					node->value = l + r;
+				}
+				else if (node->name == "-") {
+					node->name = "";
+					node->value = l - r;
+				}
+				else if (node->name == "*") {
+					node->name = "";
+					node->value = l * r;
+				}
+				else if (node->name == "/") {
+					node->name = "";
+					node->value = l / r;
+				}
+				else if (node->name == "^") {
+					node->name = "";
+					node->value = pow(l, r);
+				}
 			}
 		}
 	}
@@ -2000,10 +2079,11 @@ void expression()
 		return;
 	}
 	tree.show();
+	Sleep(5000);
 	std::deque<std::string>variables;
 	tree.fill(variables);
 	int choise = expression_menu();
-	while (choise != 3) {
+	while (choise != 4) {
 		if (choise == 0) {
 			system("cls");
 			tree.show();
@@ -2011,12 +2091,26 @@ void expression()
 			system("pause");
 			choise = expression_menu();
 		}
-		else if (choise==1) {
-			tree.simplification();
+		else if (choise == 1) {
+			system("cls");
+			tree.show_min();
+			std::cout << std::endl;
 			system("pause");
 			choise = expression_menu();
 		}
-		else if (choise == 2) {
+		else if (choise==2) {
+			expTree tree_for_simplification = tree;
+			tree_for_simplification.simplification();
+			std::cout << "With maximum of brackets: ";
+			tree_for_simplification.show();
+			std::cout << std::endl;
+			std::cout << "With minimum of brackets: ";
+			tree_for_simplification.show_min();
+			std::cout << std::endl;
+			system("pause");
+			choise = expression_menu();
+		}
+		else if (choise == 3) {
 			std::deque<double>values;
 			for (size_t i = 0; i < variables.size(); i++) {
 				double to_push;
@@ -2055,9 +2149,10 @@ void expression()
 				}
 				values.push_back(to_push);
 			}
-			tree.fill_values(values, variables);
+			expTree tree_for_calculation = tree;
+			tree_for_calculation.fill_values(values, variables);
 			system("cls");
-			std::cout << tree.calculate();
+			std::cout << tree_for_calculation.calculate()<<std::endl;
 			system("pause");
 			choise = expression_menu();
 		}
@@ -2144,14 +2239,16 @@ int expression_menu() {
 	int code;
 	do {
 		system("cls");
-		choise = (choise + 4) % 4;
-		if (choise == 0) std::cout << "-> see tree" << std::endl;
-		else  std::cout << "   see tree" << std::endl;
-		if (choise == 1) std::cout << "-> simplification" << std::endl;
+		choise = (choise + 5) % 5;
+		if (choise == 0) std::cout << "-> see tree with max brackets" << std::endl;
+		else  std::cout << "   see tree with max brackets" << std::endl;
+		if (choise == 1) std::cout << "-> see tree with min brackets" << std::endl;
+		else  std::cout << "   see tree with min brackets" << std::endl;
+		if (choise == 2) std::cout << "-> simplification" << std::endl;
 		else  std::cout << "   simplification" << std::endl;
-		if (choise == 2) std::cout << "-> calculate" << std::endl;
+		if (choise == 3) std::cout << "-> calculate" << std::endl;
 		else  std::cout << "   calculate" << std::endl;
-		if (choise == 3) std::cout << "-> end" << std::endl;
+		if (choise == 4) std::cout << "-> end" << std::endl;
 		else  std::cout << "   end" << std::endl;
 		code = _getch();
 		if (code == 224)
