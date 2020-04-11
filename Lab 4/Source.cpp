@@ -1,5 +1,8 @@
 #include "Header.h"
 
+
+
+
 template <class T>
 void binaryTree<T>::add(T value, binaryNode<T>* node)
 {
@@ -373,6 +376,16 @@ void expTree::show(Node* node)
 		if (node->left && node->right) {
 			std::cout << '(';
 			show(node->left);
+			if (node->name == "+" && node->right && node->right->name == "" && node->right->value < 0) {
+				std::cout << node->right->value;
+				std::cout << ')';
+				return;
+			}
+			if (node->name == "-" && node->right && node->right->name == "" && node->right->value < 0) {
+				std::cout << "+"<<abs(node->right->value);
+				std::cout << ')';
+				return;
+			}
 			std::cout << node->name;
 			show(node->right);
 			std::cout << ')';
@@ -402,12 +415,30 @@ void expTree::show_min(Node* node, int priority)
 		if (node->left && node->right && pr<priority) {
 			std::cout << '(';
 			show_min(node->left,pr);
+			if (node->name == "+" && node->right && node->right->name == "" && node->right->value < 0) {
+				std::cout << node->right->value;
+				std::cout << ')';
+				return;
+			}
+			if (node->name == "-" && node->right && node->right->name == "" && node->right->value < 0) {
+				std::cout << "+" << abs(node->right->value);
+				std::cout << ')';
+				return;
+			}
 			std::cout << node->name;
 			show_min(node->right,pr);
 			std::cout << ')';
 		}
 		else if (node->left && node->right) {
 			show_min(node->left,pr);
+			if (node->name == "+" && node->right && node->right->name == "" && node->right->value < 0) {
+				std::cout << node->right->value;
+				return;
+			}
+			if (node->name == "-" && node->right && node->right->name == "" && node->right->value < 0) {
+				std::cout << "+" << abs(node->right->value);
+				return;
+			}
 			std::cout << node->name;
 			show_min(node->right,pr);
 		}
@@ -549,7 +580,9 @@ std::string form_string()
 	std::string to_return="";
 
 	form_signs(to_return);
-	add_brackets(to_return,0,to_return.length()-1);
+	if (to_return != "") {
+		add_brackets(to_return, 0, to_return.length() - 1);
+	}
 	
 	return to_return;
 }
@@ -625,7 +658,7 @@ void add_brackets(std::string& to_return,size_t begin,size_t end) {
 			if (code == 72) choise--;
 		}
 	} while (code != 13);
-	if (choise < size) {
+	if ((size_t)choise < size) {
 		int choise2 = 0;
 		if (choise == size-1) {
 			choise += begin;
@@ -748,16 +781,293 @@ double expTree::calculation(Node* node)
 	throw TreeErr("node doesn't exist");
 }
 
+void expTree::error_checking(Node* node)
+{
+	if (node) {
+		if (node->left && (node->left->name == "+" || node->left->name == "-" || node->left->name == "*" || node->left->name == "/" || node->left->name == "^")) {
+			try
+			{
+				error_checking(node->left);
+			}
+			catch (const std::exception& ex)
+			{
+				throw ex;
+				return;
+			}
+		}
+		if (node->right && (node->right->name == "+" || node->right->name == "-" || node->right->name == "*" || node->right->name == "/" || node->right->name == "^")) {
+			try
+			{
+				error_checking(node->right);
+			}
+			catch (const std::exception& ex)
+			{
+				throw ex;
+				return;
+			}
+		}
+		if (node->left && node->right) {
+			if (node->name == "/" && node->right->name == "" && node->right->value == 0) {
+				throw TreeErr("Division by 0");
+			}
+		}
+	}
+}
+
+int expTree::subtree_height(Node* node)
+{
+	if (node) {
+		int left=0;
+		int right=0;
+		if (node->left) {
+			left = subtree_height(node->left);
+		}
+		if (node->right) {
+			left = subtree_height(node->right);
+		}
+		if (right >= left) {
+			return right + 1;
+		}
+		else {
+			return left + 1;
+		}
+	}
+	else {
+		return 0;
+	}
+}
+
+void expTree::logic_simplification(Node*& node)
+{
+	if (node) {
+		logic_simplification(node->left);
+		logic_simplification(node->right);
+		int left_height = subtree_height(node->left);
+		int right_height = subtree_height(node->right);
+		if (left_height < right_height) {
+			Node* help = node->left;
+			node->left = node->right;
+			node->right = help;
+		}
+		else if (left_height == 1 && right_height == 1) {
+			if (node->left->name == "" && !(node->right->name == "" || node->right->name == "+" || node->right->name == "-" || node->right->name == "*" || node->right->name == "/" || node->right->name == "^")) {
+				Node* help = node->left;
+				node->left = node->right;
+				node->right = help;
+			}
+		}
+		logic_simplification(node->left);
+		logic_simplification(node->right);
+		if (node->name == "+"){
+			expTree left(node->left);
+			expTree right(node->right);
+			if(node->left->right && node->left->name=="-"){
+				expTree leftright(node->left->right);
+				if (leftright == right) {
+					Node* to_delete1 = node->left->right;
+					Node* to_delete2 = node->right;
+					node = node->left->left;
+					delete to_delete1;
+					delete to_delete2;
+				}
+			}
+			else if (left.root->name == "*") {
+				if (left.root->right->name == "") {
+					expTree leftleft(node->left->left);
+					if (leftleft == right) {
+						Node* for_delete = node;
+						node = node->left;
+						node->right->value++;
+						delete for_delete;
+					}
+				}
+			}
+		}
+		if (node->name == "-") {
+			expTree left(node->left);
+			expTree right(node->right);
+			if (left == right) {
+				delete_subtree(node->left);
+				delete_subtree(node->right);
+				node->name = "";
+				node->value = 0;
+			}
+			else if (left.root->name == "+") {
+				expTree leftleft(node->left->left);
+				expTree leftright(node->left->right);
+				if (leftleft == right) {
+					Node* to_delete1 = node->left->left;
+					Node* to_delete2 = node->right;
+					node = node->left->right;
+					delete to_delete1;
+					delete to_delete2;
+				}
+				else if (leftright == right) {
+					Node* to_delete1 = node->left->right;
+					Node* to_delete2 = node->right;
+					node = node->left->left;
+					delete to_delete1;
+					delete to_delete2;
+				}
+			}
+			else if (left.root->name == "*") {
+				if (left.root->right->name == "") {
+					expTree leftleft(node->left->left);
+					if (leftleft == right) {
+						Node* for_delete = node;
+						node = node->left;
+						node->right->value--;
+						delete for_delete;
+					}
+				}
+			}
+		}
+		if (node->name == "/") {
+			expTree left(node->left);
+			expTree right(node->right);
+			if (node->right->name == "" && node->right->value == 0) {
+				throw TreeErr("Division by 0");
+			}
+			else if (left == right) {
+				delete_subtree(node->left);
+				delete_subtree(node->right);
+				node->name = "";
+				node->value = 1;
+			}
+			else if (node->right->name == "" && node->right->value == 1) {
+				Node* for_delete = node;
+				node = node->left;
+				delete for_delete;
+			}
+			else if (left.root->name == "*") {
+				expTree leftleft(node->left->left);
+				expTree leftright(node->left->right);
+				if (leftleft == right) {
+					Node* to_delete1 = node->left->left;
+					Node* to_delete2 = node->right;
+					node = node->left->right;
+					delete to_delete1;
+					delete to_delete2;
+				}
+				else if (leftright == right) {
+					Node* to_delete1 = node->left->right;
+					Node* to_delete2 = node->right;
+					node = node->left->left;
+					delete to_delete1;
+					delete to_delete2;
+				}
+			}
+			else if (left.root->name == "^") {
+				if (left.root->right->name == "") {
+					expTree leftleft(node->left->left);
+					if (leftleft == right) {
+						Node* for_delete = node;
+						node = node->left;
+						node->right->value--;
+						delete for_delete;
+						logic_simplification(node);
+					}
+				}
+			}
+		}
+		if (node->name == "*") {
+			expTree left(node->left);
+			expTree right(node->right);
+			if (node->left->right && node->left->name == "/") {
+				expTree leftright(node->left->right);
+				if (leftright == right) {
+					Node* to_delete1 = node->left->right;
+					Node* to_delete2 = node->right;
+					node = node->left->left;
+					delete to_delete1;
+					delete to_delete2;
+				}
+			}
+			if (node->left->name == "" && node->left->value == 0 || node->right->name == "" && node->right->value == 0) {
+				delete_subtree(node->left);
+				delete_subtree(node->right);
+				node->name = "";
+				node->value = 0;
+			}
+			else if (node->left->name == "" && node->left->value == 1) {
+				Node* for_delete = node;
+				node = node->right;
+				delete for_delete;
+			}
+			else if (node->right->name == "" && node->right->value == 1) {
+				Node* for_delete = node;
+				node = node->left;
+				delete for_delete;
+			}
+			else if (left.root->name == "^") {
+				if (left.root->right->name == "") {
+					expTree leftleft(node->left->left);
+					if (leftleft == right) {
+						Node* for_delete = node;
+						node = node->left;
+						node->right->value++;
+						delete for_delete;
+					}
+				}
+			}
+		}
+		if (node->name == "^") {
+			if (node->right->name == "" && node->right->value==0) {
+				delete_subtree(node);
+				node = new Node("", 1);
+			}
+			else if (node->right->name == "" && node->right->value == 1) {
+				Node* for_delete = node;
+				delete node->right;
+				node = node->left;
+				delete for_delete;
+			}
+		}
+	}
+}
+
+void expTree::last_simplification(Node* node)
+{
+	if (node) {
+		last_simplification(node->left);
+		last_simplification(node->right);
+		if (node->name == "*") {
+			expTree left(node->left);
+			expTree right(node->right);
+			if (left == right) {
+				delete_subtree(node->right->left);
+				delete_subtree(node->right->right);
+				node->name = "^";
+				node->right->name = "";
+				node->right->value = 2;
+			}
+		}
+	}
+}
 
 
 void expTree::calc_simplification(Node* node)
 {
 	if (node) {
 		if (node->left&&(node->left->name == "+" || node->left->name == "-" || node->left->name == "*" || node->left->name == "/" || node->left->name == "^")) {
-			calc_simplification(node->left);
+			try
+			{
+				calc_simplification(node->left);
+			}
+			catch (const std::exception& ex)
+			{
+				throw ex;
+			}
 		}
 		if (node->right&&(node->right->name == "+" || node->right->name == "-" || node->right->name == "*" || node->right->name == "/" || node->right->name == "^")) {
-			calc_simplification(node->right);
+			try
+			{
+				calc_simplification(node->right);
+			}
+			catch (const std::exception& ex)
+			{
+				throw ex;
+			}
 		}
 		double l;
 		double r;
@@ -783,6 +1093,10 @@ void expTree::calc_simplification(Node* node)
 				}
 				else if (node->name == "/") {
 					node->name = "";
+					if (r == 0) {
+						throw TreeErr("Division by 0");
+						return;
+					}
 					node->value = l / r;
 				}
 				else if (node->name == "^") {
@@ -794,17 +1108,91 @@ void expTree::calc_simplification(Node* node)
 	}
 }
 
-/*double expTree::plus_simplification(Node* node)
+void expTree::second_calc_simplification(Node* node)
 {
-	return 0.0;
-}*/
-
-/*double expTree::plus_simplification(Node* node, double& to_plus)
-{
-	return 0.0;
-}*/
-
-
+	if (node) {
+		second_calc_simplification(node->left);
+		second_calc_simplification(node->right);
+		int left_height = subtree_height(node->left);
+		int right_height = subtree_height(node->right);
+		if (left_height < right_height) {
+			Node* help = node->left;
+			node->left = node->right;
+			node->right = help;
+		}
+		else if (left_height==1 && right_height==1 ) {
+			if (node->left->name == "" && !(node->right->name == "" || node->right->name == "+" || node->right->name == "-" || node->right->name == "*" || node->right->name == "/" || node->right->name == "^")) {
+				Node* help = node->left;
+				node->left = node->right;
+				node->right = help;
+			}
+		}
+		if (node->name == "*" && node->right->name == "") {
+			if (node->left->name == "*" && node->left->right->name == "") {
+				node->right->value *= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+			if (node->left->name == "/" && node->left->right->name == "") {
+				node->right->value /= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+		}
+		if (node->name=="/" && node->right->name == "") {
+			if (node->left->name == "*" && node->left->right->name == "") {
+				node->right->value /= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+			if (node->left->name == "/" && node->left->right->name == "") {
+				node->right->value *= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+		}
+		if (node->name == "+" && node->right->name == "") {
+			if (node->left->name == "+" && node->left->right->name == "") {
+				node->right->value += node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+			if (node->left->name == "-" && node->left->right->name == "") {
+				node->right->value -= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+		}
+		if (node->name == "-" && node->right->name == "") {
+			if (node->left->name == "+" && node->left->right->name == "") {
+				node->right->value -= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+			if (node->left->name == "-" && node->left->right->name == "") {
+				node->right->value += node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+		}
+		if (node->name == "^" && node->right->name == "") {
+			if (node->left->name == "^" && node->left->right->name == "") {
+				node->right->value *= node->left->right->value;
+				Node* help = node->left->left;
+				delete node->left;
+				node->left = help;
+			}
+		}
+	}
+}
 
 void main_launch()
 {
@@ -874,6 +1262,7 @@ void demomode()
 	std::cout << "-> ordinary tree" << std::endl;
 	std::cout << "   binary tree" << std::endl;
 	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
 	Sleep(2000);
 	system("cls");
 
@@ -888,46 +1277,46 @@ void demomode()
 	std::cout << "Enter number to add" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter min number of children" << std::endl;
 	Sleep(500);
 	std::cout << 2;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter max number of children" << std::endl;
 	Sleep(500);
 	std::cout << 3;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	tree.add(0, 2, 3);
 
 	show_menu(4);
 	tree.show();
-	Sleep(1000);
+	Sleep(2500);
 	system("cls");
 
 	show_menu(0);
 	std::cout << "Enter number to add" << std::endl;
 	Sleep(500);
 	std::cout << 1;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter min number of children" << std::endl;
 	Sleep(500);
 	std::cout << 2;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter max number of children" << std::endl;
 	Sleep(500);
 	std::cout << 3;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	tree.add(1, 2, 3);
 
 	show_menu(4);
 	tree.show();
-	Sleep(1000);
+	Sleep(2500);
 	system("cls");
 
 	show_menu(1);
@@ -936,7 +1325,7 @@ void demomode()
 	std::cout << 3;
 	Sleep(300);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter way" << std::endl;
 	std::cout << "-> type" << std::endl;
@@ -946,14 +1335,14 @@ void demomode()
 	std::cout << "Enter way" << std::endl;
 	std::cout << "   type" << std::endl;
 	std::cout << "-> empty way" << std::endl;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::deque<size_t>my_way;
 	tree.add(30, my_way);
 
 	show_menu(4);
 	tree.show();
-	Sleep(1000);
+	Sleep(3000);
 	system("cls");
 
 	show_menu(1);
@@ -962,7 +1351,7 @@ void demomode()
 	std::cout << 3;
 	Sleep(300);
 	std::cout << 1;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter way" << std::endl;
 	std::cout << "-> type" << std::endl;
@@ -972,130 +1361,18 @@ void demomode()
 	std::cout << "Enter next step" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
-	std::cout << "Enter way" << std::endl;
-	std::cout << "-> type" << std::endl;
-	std::cout << "   empty way" << std::endl;
+	std::cout << "-> continue typing" << std::endl;
+	std::cout << "   break" << std::endl;
 	Sleep(500);
 	system("cls");
-	std::cout << "Enter way" << std::endl;
-	std::cout << "   type" << std::endl;
-	std::cout << "-> empty way" << std::endl;
+	std::cout << "   continue typing" << std::endl;
+	std::cout << "-> break" << std::endl;
 	Sleep(700);
 	system("cls");
 	my_way = { 0 };
 	tree.add(31, my_way);
-
-	show_menu(4);
-	tree.show();
-	Sleep(1000);
-	system("cls");
-
-	show_menu(0);
-	std::cout << "Enter number to add" << std::endl;
-	Sleep(500);
-	std::cout << 2;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter min number of children" << std::endl;
-	Sleep(500);
-	std::cout << 3;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter max number of children" << std::endl;
-	Sleep(500);
-	std::cout << 4;
-	Sleep(700);
-	system("cls");
-	tree.add(2, 3, 4);
-
-	show_menu(4);
-	tree.show();
-	Sleep(2000);
-	system("cls");
-
-	show_menu(0);
-	std::cout << "Enter number to add" << std::endl;
-	Sleep(500);
-	std::cout << 3;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter min number of children" << std::endl;
-	Sleep(500);
-	std::cout << 0;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter max number of children" << std::endl;
-	Sleep(500);
-	std::cout << 3;
-	Sleep(700);
-	system("cls");
-	tree.add(3, 0, 3);
-
-	show_menu(4);
-	tree.show();
-	Sleep(1000);
-	system("cls");
-
-	show_menu(0);
-	std::cout << "Enter number to add" << std::endl;
-	Sleep(500);
-	std::cout << 4;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter min number of children" << std::endl;
-	Sleep(500);
-	std::cout << 3;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter max number of children" << std::endl;
-	Sleep(500);
-	std::cout << 3;
-	Sleep(700);
-	system("cls");
-	tree.add(4, 3, 3);
-
-	show_menu(4);
-	tree.show();
-	Sleep(2000);
-	system("cls");
-
-	show_menu(0);
-	std::cout << "Enter number to add" << std::endl;
-	Sleep(500);
-	std::cout << 5;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter min number of children" << std::endl;
-	Sleep(500);
-	std::cout << 2;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter max number of children" << std::endl;
-	Sleep(500);
-	std::cout << 5;
-	Sleep(700);
-	system("cls");
-	tree.add(5, 2, 5);
-
-	show_menu(0);
-	std::cout << "Enter number to add" << std::endl;
-	Sleep(500);
-	std::cout << 6;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter min number of children" << std::endl;
-	Sleep(500);
-	std::cout << 3;
-	Sleep(700);
-	system("cls");
-	std::cout << "Enter max number of children" << std::endl;
-	Sleep(500);
-	std::cout << 4;
-	Sleep(700);
-	system("cls");
-	tree.add(6, 3, 4);
 
 	show_menu(4);
 	tree.show();
@@ -1105,36 +1382,146 @@ void demomode()
 	show_menu(0);
 	std::cout << "Enter number to add" << std::endl;
 	Sleep(500);
-	std::cout << 7;
-	Sleep(700);
+	std::cout << 2;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter min number of children" << std::endl;
+	Sleep(500);
+	std::cout << 3;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter max number of children" << std::endl;
+	Sleep(500);
+	std::cout << 4;
+	Sleep(1500);
+	system("cls");
+	tree.add(2, 3, 4);
+
+	show_menu(4);
+	tree.show();
+	Sleep(3000);
+	system("cls");
+
+	show_menu(0);
+	std::cout << "Enter number to add" << std::endl;
+	Sleep(500);
+	std::cout << 3;
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter min number of children" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter max number of children" << std::endl;
 	Sleep(500);
-	std::cout << 1;
-	Sleep(700);
+	std::cout << 3;
+	Sleep(1500);
 	system("cls");
-	tree.add(7, 0, 1);
+	tree.add(3, 0, 3);
 
 	show_menu(4);
 	tree.show();
 	Sleep(3500);
 	system("cls");
 
+	show_menu(0);
+	std::cout << "Enter number to add" << std::endl;
+	Sleep(500);
+	std::cout << 4;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter min number of children" << std::endl;
+	Sleep(500);
+	std::cout << 3;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter max number of children" << std::endl;
+	Sleep(500);
+	std::cout << 3;
+	Sleep(1500);
+	system("cls");
+	tree.add(4, 3, 3);
+
+	show_menu(4);
+	tree.show();
+	Sleep(3500);
+	system("cls");
+
+	show_menu(0);
+	std::cout << "Enter number to add" << std::endl;
+	Sleep(500);
+	std::cout << 5;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter min number of children" << std::endl;
+	Sleep(500);
+	std::cout << 2;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter max number of children" << std::endl;
+	Sleep(500);
+	std::cout << 5;
+	Sleep(1500);
+	system("cls");
+	tree.add(5, 2, 5);
+
+	show_menu(0);
+	std::cout << "Enter number to add" << std::endl;
+	Sleep(500);
+	std::cout << 6;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter min number of children" << std::endl;
+	Sleep(500);
+	std::cout << 3;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter max number of children" << std::endl;
+	Sleep(500);
+	std::cout << 4;
+	Sleep(1500);
+	system("cls");
+	tree.add(6, 3, 4);
+
+	show_menu(4);
+	tree.show();
+	Sleep(4000);
+	system("cls");
+
+	show_menu(0);
+	std::cout << "Enter number to add" << std::endl;
+	Sleep(500);
+	std::cout << 7;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter min number of children" << std::endl;
+	Sleep(500);
+	std::cout << 0;
+	Sleep(1500);
+	system("cls");
+	std::cout << "Enter max number of children" << std::endl;
+	Sleep(500);
+	std::cout << 1;
+	Sleep(1500);
+	system("cls");
+	tree.add(7, 0, 1);
+
+	show_menu(4);
+	tree.show();
+	Sleep(4000);
+	system("cls");
+
 	show_menu(10);
 	std::cout << tree.size();
-	Sleep(1500);
+	Sleep(2000);
 	system("cls");
 
 	show_menu(2);
 	std::cout << "Enter index" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1000);
 	system("cls");
 	std::deque<size_t>way = tree.get_way(0);
 	if (way.size() == 0) {
@@ -1153,7 +1540,7 @@ void demomode()
 	std::cout << "Enter index" << std::endl;
 	Sleep(500);
 	std::cout << 3;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	way = tree.get_way(3);
 	if (way.size() == 0) {
@@ -1173,7 +1560,7 @@ void demomode()
 	std::cout << "Enter next step" << std::endl;
 	Sleep(500);
 	std::cout << 1;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "-> continue typing" << std::endl;
 	std::cout << "   break" << std::endl;
@@ -1182,7 +1569,7 @@ void demomode()
 	std::cout << "Enter next step" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "-> continue typing" << std::endl;
 	std::cout << "   break" << std::endl;
@@ -1212,7 +1599,7 @@ void demomode()
 	std::cout << "Enter next step" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "-> continue typing" << std::endl;
 	std::cout << "   break" << std::endl;
@@ -1221,7 +1608,7 @@ void demomode()
 	std::cout << "Enter next step" << std::endl;
 	Sleep(500);
 	std::cout << 0;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "-> continue typing" << std::endl;
 	std::cout << "   break" << std::endl;
@@ -1274,17 +1661,17 @@ void demomode()
 	std::cout <<1;
 	Sleep(250);
 	std::cout << 1;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter min number of children" << std::endl;
 	Sleep(500);
 	std::cout << 2;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter max number of children" << std::endl;
 	Sleep(500);
 	std::cout << 4;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	tree.add(11, 2, 4);
 
@@ -1292,41 +1679,41 @@ void demomode()
 	std::cout << "Enter number to add" << std::endl;
 	Sleep(500);
 	std::cout << 4;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter min number of children" << std::endl;
 	Sleep(500);
 	std::cout << 2;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	std::cout << "Enter max number of children" << std::endl;
 	Sleep(500);
 	std::cout << 4;
-	Sleep(700);
+	Sleep(1500);
 	system("cls");
 	tree.add(4, 2, 4);
 
 	show_menu(4);
 	tree.show();
-	Sleep(5000);
+	Sleep(6000);
 	system("cls");
 
 	show_menu(8);
 	std::cout << "Enter number to delete" << std::endl;
 	Sleep(500);
 	std::cout << 4;
-	Sleep(700);
+	Sleep(1500);
 	tree.remove(4);
 	system("cls");
 
 	show_menu(4);
 	tree.show();
-	Sleep(5000);
+	Sleep(6000);
 	system("cls");
 
 	show_menu(10);
 	std::cout << tree.size();
-	Sleep(2500);
+	Sleep(3000);
 	system("cls");
 
 	show_menu(9);
@@ -1350,11 +1737,13 @@ void demomode()
 	std::cout << "-> ordinary tree" << std::endl;
 	std::cout << "   binary tree" << std::endl;
 	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
 	Sleep(500);
 	system("cls");
 	std::cout << "   ordinary tree" << std::endl;
 	std::cout << "-> binary tree" << std::endl;
 	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
 	Sleep(1000);
 	system("cls");
 	binaryTree<int>bin_tree;
@@ -1532,6 +1921,223 @@ void demomode()
 
 	show_menu1(5);
 
+
+
+	system("cls");
+	std::cout << "-> ordinary tree" << std::endl;
+	std::cout << "   binary tree" << std::endl;
+	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
+	Sleep(500);
+	system("cls");
+	std::cout << "   ordinary tree" << std::endl;
+	std::cout << "-> binary tree" << std::endl;
+	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
+	Sleep(500);
+	system("cls");
+	std::cout << "   ordinary tree" << std::endl;
+	std::cout << "   binary tree" << std::endl;
+	std::cout << "-> expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
+	Sleep(500);
+	system("cls");
+
+	std::string main_string = "";
+
+	system("cls");
+	std::cout << "Enter signs of your expression" << std::endl << std::endl;
+	std::cout << main_string << std::endl << std::endl;
+	std::cout << "-> +" << std::endl;
+	std::cout << "   -" << std::endl;
+	std::cout << "   *" << std::endl;
+	std::cout << "   /" << std::endl;
+	std::cout << "   ^" << std::endl;
+	std::cout << "   break" << std::endl;
+	Sleep(250);
+	system("cls");
+	std::cout << "Enter signs of your expression" << std::endl << std::endl;
+	std::cout << main_string << std::endl << std::endl;
+	std::cout << "   +" << std::endl;
+	std::cout << "-> -" << std::endl;
+	std::cout << "   *" << std::endl;
+	std::cout << "   /" << std::endl;
+	std::cout << "   ^" << std::endl;
+	std::cout << "   break" << std::endl;
+	Sleep(250);
+	system("cls");
+	std::cout << "Enter signs of your expression" << std::endl << std::endl;
+	std::cout << main_string << std::endl << std::endl;
+	std::cout << "   +" << std::endl;
+	std::cout << "   -" << std::endl;
+	std::cout << "-> *" << std::endl;
+	std::cout << "   /" << std::endl;
+	std::cout << "   ^" << std::endl;
+	std::cout << "   break" << std::endl;
+	Sleep(500);
+	system("cls");
+	Sleep(2000);
+	std::cout << "... few months later ...";
+	Sleep(2000);
+	system("cls");
+	std::cout << "Enter signs of your expression" << std::endl << std::endl;
+	std::cout << main_string << std::endl << std::endl;
+	std::cout << "   +" << std::endl;
+	std::cout << "-> -" << std::endl;
+	std::cout << "   *" << std::endl;
+	std::cout << "   /" << std::endl;
+	std::cout << "   ^" << std::endl;
+	std::cout << "   break" << std::endl;
+	Sleep(2000);
+	system("cls");
+	main_string = "*+-+++*+-+^/+-^++^-";
+	system("cls");
+	std::cout << "If you want, you can add brackets" << std::endl << std::endl;
+	std::cout << main_string << std::endl << std::endl;
+	std::cout << "-> insert ( before 1 sign"<<std::endl;
+	std::cout << "   insert ( before 2 sign" << std::endl;
+	std::cout << "   insert ( before 3 sign" << std::endl;
+	std::cout << "   insert ( before 4 sign" << std::endl;
+	std::cout << "   insert ( before 5 sign" << std::endl;
+	std::cout << "   insert ( before 6 sign" << std::endl;
+	std::cout << "   insert ( before 7 sign" << std::endl;
+	std::cout << "   insert ( before 8 sign" << std::endl;
+	std::cout << "   insert ( before 9 sign" << std::endl;
+	std::cout << "   insert ( before 10 sign" << std::endl;
+	std::cout << "   insert ( before 11 sign" << std::endl;
+	std::cout << "   insert ( before 12 sign" << std::endl;
+	std::cout << "   insert ( before 13 sign" << std::endl;
+	std::cout << "   insert ( before 14 sign" << std::endl;
+	std::cout << "   insert ( before 15 sign" << std::endl;
+	std::cout << "   insert ( before 16 sign" << std::endl;
+	std::cout << "   insert ( before 17 sign" << std::endl;
+	std::cout << "   insert ( before 18 sign" << std::endl;
+	Sleep(2000);
+	system("cls");
+	Sleep(2000);
+	std::cout << "... few months later ...";
+	Sleep(2000);
+	system("cls");
+	main_string = "*(+)-(+)+(+)*(+)-(+)^/(+-^++^-";
+	std::cout << "Add ) after:" << std::endl << std::endl;
+	std::cout << main_string << std::endl << std::endl;
+	std::cout << "   insert ) after 12 sign" << std::endl;
+	std::cout << "   insert ) after 13 sign" << std::endl;
+	std::cout << "   insert ) after 14 sign" << std::endl;
+	std::cout << "   insert ) after 15 sign" << std::endl;
+	std::cout << "   insert ) after 16 sign" << std::endl;
+	std::cout << "   insert ) after 17 sign" << std::endl;
+	std::cout << "-> insert ) after 18 sign" << std::endl;
+	Sleep(2000);
+	main_string = "(*(+)-(+))*((+)*(+)-(+)^/(+)-(^++^-))";
+
+	expTree exp_tree;
+	exp_tree.form_tree(main_string);
+	exp_tree.show();
+	Sleep(5000);
+	std::deque<std::string>variables = {"y","z","a","b","c","k"};
+	std::deque<std::string>for_fill = { "","y","z","y","z","a","b","a","b","a","c","","a","c","","","","k","","k" };
+	std::deque<int>numbers = { 6,3,4,2,3,1 };
+
+	system("cls");
+	std::cout << "After a few months of filling:" << std::endl;
+	Sleep(2000);
+	system("cls");
+	std::cout << "-> variable" << std::endl;
+	std::cout << "   number" << std::endl;
+	Sleep(700);
+	system("cls");
+	std::cout << "Enter name of variable" << std::endl;
+	Sleep(500);
+	std::cout << "k";
+	Sleep(1000);
+	system("cls");
+
+	exp_tree.fill_demo(for_fill,numbers);
+
+	show_menu2(0);
+	exp_tree.show();
+	Sleep(15000);
+	system("cls");
+
+	show_menu2(1);
+	exp_tree.show_min();
+	Sleep(15000);
+	system("cls");
+
+	show_menu2(2);
+	expTree for_simpl(exp_tree);
+	for_simpl.simplification();
+	std::cout << "With max brackets: ";
+	for_simpl.show();
+	std::cout << "\nWith min brackets: ";
+	for_simpl.show_min();
+	Sleep(15000);
+	system("cls");
+
+
+	show_menu2(3);
+	std::cout << "Enter value of y" << std::endl;
+	Sleep(500);
+	std::cout << "3"<<std::endl;
+	Sleep(700);
+	std::cout << "Enter value of z" << std::endl;
+	Sleep(500);
+	std::cout << "1" << std::endl;
+	Sleep(700);
+	std::cout << "Enter value of a" << std::endl;
+	Sleep(500);
+	std::cout << "-1" << std::endl;
+	Sleep(700);
+	std::cout << "Enter value of b" << std::endl;
+	Sleep(500);
+	std::cout << "4" << std::endl;
+	Sleep(700);
+	std::cout << "Enter value of c" << std::endl;
+	Sleep(500);
+	std::cout << "5" << std::endl;
+	Sleep(700);
+	std::cout << "Enter value of k" << std::endl;
+	Sleep(500);
+	std::cout << "-5" << std::endl;
+	Sleep(700);
+	std::deque<double>values = { 3,1,-1,4,5,-5 };
+	exp_tree.fill_values(values, variables);
+	system("cls");
+	std::cout << exp_tree.calculate() << std::endl;
+	Sleep(5000);
+	system("cls");
+
+	show_menu2(4);
+
+
+	system("cls");
+	std::cout << "-> ordinary tree" << std::endl;
+	std::cout << "   binary tree" << std::endl;
+	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
+	Sleep(500);
+	system("cls");
+	std::cout << "   ordinary tree" << std::endl;
+	std::cout << "-> binary tree" << std::endl;
+	std::cout << "   expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
+	Sleep(500);
+	system("cls");
+	std::cout << "   ordinary tree" << std::endl;
+	std::cout << "   binary tree" << std::endl;
+	std::cout << "-> expression tree" << std::endl;
+	std::cout << "   exit" << std::endl;
+	Sleep(500);
+	system("cls");
+	std::cout << "   ordinary tree" << std::endl;
+	std::cout << "   binary tree" << std::endl;
+	std::cout << "   expression tree" << std::endl;
+	std::cout << "-> exit" << std::endl;
+	Sleep(1000);
+	system("cls");
+
+	std::cout << "Thanks for your attention" << std::endl;
 	system("pause");
 }
 
@@ -2074,6 +2680,7 @@ void expression()
 	}
 	catch (const std::exception& ex)
 	{
+		system("cls");
 		std::cout << ex.what() << std::endl;
 		system("pause");
 		return;
@@ -2100,15 +2707,24 @@ void expression()
 		}
 		else if (choise==2) {
 			expTree tree_for_simplification = tree;
-			tree_for_simplification.simplification();
-			std::cout << "With maximum of brackets: ";
-			tree_for_simplification.show();
-			std::cout << std::endl;
-			std::cout << "With minimum of brackets: ";
-			tree_for_simplification.show_min();
-			std::cout << std::endl;
-			system("pause");
-			choise = expression_menu();
+			try
+			{
+				tree_for_simplification.simplification();
+				std::cout << "With maximum of brackets: ";
+				tree_for_simplification.show();
+				std::cout << std::endl;
+				std::cout << "With minimum of brackets: ";
+				tree_for_simplification.show_min();
+				std::cout << std::endl;
+				system("pause");
+				choise = expression_menu();
+			}
+			catch (const std::exception& ex)
+			{
+				std::cout << ex.what() << std::endl;
+				system("pause");
+				choise = expression_menu();
+			}
 		}
 		else if (choise == 3) {
 			std::deque<double>values;
@@ -2152,9 +2768,18 @@ void expression()
 			expTree tree_for_calculation = tree;
 			tree_for_calculation.fill_values(values, variables);
 			system("cls");
-			std::cout << tree_for_calculation.calculate()<<std::endl;
-			system("pause");
-			choise = expression_menu();
+			try
+			{
+				std::cout << tree_for_calculation.calculate() << std::endl;
+				system("pause");
+				choise = expression_menu();
+			}
+			catch (const std::exception& ex)
+			{
+				std::cout << ex.what() << std::endl;
+				system("pause");
+				choise = expression_menu();
+			}
 		}
 	}
 }
@@ -2367,6 +2992,23 @@ void show_menu1(int choise) {
 			}
 		}
 		Sleep(350);
+		system("cls");
+	}
+}
+
+void show_menu2(int choise) {
+	std::string menu[] = { "see tree with max brackets","see tree with min brackets",
+	"simplification","calculate","end" };
+	for (int i = 0; i <= choise; i++) {
+		for (int j = 0; j < 5; j++) {
+			if (j == i) {
+				std::cout << "-> " << menu[j] << std::endl;
+			}
+			else {
+				std::cout << "   " << menu[j] << std::endl;
+			}
+		}
+		Sleep(500);
 		system("cls");
 	}
 }

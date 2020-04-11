@@ -8,9 +8,6 @@
 #include <cmath>
 #include <conio.h>
 #include <stdlib.h>
-/*#include <random>
-
-extern std::mt19937 mersenne;*/
 
 
 class TreeErr :public std::logic_error
@@ -468,8 +465,20 @@ public:
 		delete_subtree(root);
 	}
 
+	bool operator==(const expTree& other)
+	{
+		return equal_node(this->root, other.root);
+	}
+
 	double calculate() {
-		return calculation(root);
+		try
+		{
+			return calculation(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
 	}
 
 	void show_min() {
@@ -482,7 +491,6 @@ public:
 	}
 
 	void form_tree(std::string main_string);
-	//void form_main_subtree()
 	void show() {
 		if (root) {
 			show(root);
@@ -500,15 +508,96 @@ public:
 	void fill_values(std::deque<double>& values,std::deque<std::string>& variables) {
 		if (root) {
 			fill_values(root, values,variables);
-			variables.clear();
 			values.clear();
 		}
 	}
 
 	void simplification() {
-		calc_simplification(root);
+		try
+		{
+			error_checking(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
+		try
+		{
+			calc_simplification(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
+		try
+		{
+			error_checking(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
+		try
+		{
+			logic_simplification(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
+		try
+		{
+			error_checking(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
+		second_calc_simplification(root);
+		last_simplification(root);
+		try
+		{
+			error_checking(root);
+		}
+		catch (const std::exception& ex)
+		{
+			throw ex;
+		}
+	}
+
+	void fill_demo(std::deque<std::string>for_fill, std::deque<int>for_fill2) {
+		size_t counter = 0;
+		size_t counter2 = 0;
+		fill_demo(for_fill,for_fill2, counter,counter2, root);
 	}
 private:
+	expTree(Node* node) {
+		this->root = construct_subtree(this->root, node);
+	}
+
+	bool equal_node(Node* node1, Node* node2) {
+		if ((node1->left && !(node2->left)) || (node2->left && !(node1->left)) || (node1->right && !(node2->right)) || (node2->right && !(node1->right))) {
+			return false;
+		}
+		if (node1->left && node2->left) {
+			if (!equal_node(node1->left, node2->left)) {
+				return false;
+			}
+		}
+		if (node1->right && node2->right) {
+			if (!equal_node(node1->right, node2->right)) {
+				return false;
+			}
+		}
+		if (node1->name != node2->name) {
+			return false;
+		}
+		if (node1->name == "" && node2->name == "" && node1->value!=node2->value) {
+			return false;
+		}
+		return true;
+	}
+
 	Node* construct_subtree(Node* node, Node* other_node)
 	{
 		node = new Node(other_node);
@@ -586,31 +675,39 @@ private:
 
 	void delete_subtree(Node*& node);
 
+	int subtree_height(Node* node);
+
+	void error_checking(Node* node);
+	void logic_simplification(Node*& node);
+	void second_calc_simplification(Node* node);
 	void calc_simplification(Node* node);
+	void last_simplification(Node* node);
+
 	double calculation(Node* node);
-	//double plus_simplification(Node* node);
-	//double plus_simplification(Node* node, double& to_plus);
 
 	void show(Node* node);
 	void show_min(Node* node,int priority);
 	void fill(Node* node, std::deque<std::string>& variables);
 	void fill_values(Node* node,std::deque<double>& values, std::deque<std::string>& variables);
-	//void show_sign
+	void fill_demo(std::deque<std::string> for_fill,std::deque<int>for_fill2, size_t& counter,size_t& counter2, Node* node) {
+		if (node) {
+			fill_demo(for_fill,for_fill2, counter,counter2, node->left);
+			if (node->name == ""){
+				node->name = for_fill[counter];
+				counter++;
+			}
+			if (node->name == "") {
+				node->value = for_fill2[counter2];
+				counter2++;
+			}
+			fill_demo(for_fill, for_fill2, counter, counter2, node->right);
+		}
+	}
 };
 
 std::string form_string();
 void form_signs(std::string& to_return);
 void add_brackets(std::string& to_return, size_t begin, size_t end);
-
-
-/*class logicTree {
-	struct Node {
-		int code;
-		Node* left;
-		Node* right;
-	};
-	Node* root;
-};*/
 
 
 
@@ -634,5 +731,7 @@ void expression();
 int expression_menu();
 
 void get_way(std::deque<size_t>&way);
+
 void show_menu(int what_show);
 void show_menu1(int choise);
+void show_menu2(int choise);
