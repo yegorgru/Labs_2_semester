@@ -424,27 +424,23 @@ class expTree {
 	struct Node {
 		std::string name;
 		double value;
-		Node* parent;
 		Node* left;
 		Node* right;
 		Node(std::string name, double value) {
 			this->name = name;
 			this->value = value;
-			parent = nullptr;
 			left = nullptr;
 			right = nullptr;
 		}
 		Node(std::string name) {
 			this->name = name;
 			this->value = 0;
-			parent = nullptr;
 			left = nullptr;
 			right = nullptr;
 		}
 		Node(Node* other) {
 			this->name = other->name;
 			this->value = other->value;
-			parent = nullptr;
 			left = nullptr;
 			right = nullptr;
 		}
