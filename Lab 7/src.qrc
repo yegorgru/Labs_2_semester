@@ -1,0 +1,56 @@
+<RCC>
+    <qresource prefix="/Pictures"/>
+    <qresource prefix="/Picture">
+        <file>BlueD.png</file>
+        <file>BlueDL.png</file>
+        <file>BlueDR.png</file>
+        <file>BlueL.png</file>
+        <file>BlueR.png</file>
+        <file>BlueT.png</file>
+        <file>BlueTL.png</file>
+        <file>BlueTR.png</file>
+        <file>GreenD.png</file>
+        <file>GreenDL.png</file>
+        <file>GreenDR.png</file>
+        <file>GreenL.png</file>
+        <file>GreenR.png</file>
+        <file>GreenT.png</file>
+        <file>GreenTL.png</file>
+        <file>GreenTR.png</file>
+        <file>OrangeD.png</file>
+        <file>OrangeDL.png</file>
+        <file>OrangeDR.png</file>
+        <file>OrangeL.png</file>
+        <file>OrangeR.png</file>
+        <file>OrangeT.png</file>
+        <file>OrangeTL.png</file>
+        <file>OrangeTR.png</file>
+        <file>RedD.png</file>
+        <file>RedDL.png</file>
+        <file>RedDR.png</file>
+        <file>RedL.png</file>
+        <file>RedR.png</file>
+        <file>RedT.png</file>
+        <file>RedTL.png</file>
+        <file>RedTR.png</file>
+        <file>VioletD.png</file>
+        <file>VioletDL.png</file>
+        <file>VioletDR.png</file>
+        <file>VioletL.png</file>
+        <file>VioletR.png</file>
+        <file>VioletT.png</file>
+        <file>VioletTL.png</file>
+        <file>VioletTR.png</file>
+        <file>YellowD.png</file>
+        <file>YellowDL.png</file>
+        <file>YellowDR.png</file>
+        <file>YellowL.png</file>
+        <file>YellowR.png</file>
+        <file>YellowT.png</file>
+        <file>YellowTL.png</file>
+        <file>YellowTR.png</file>
+        <file>Meat.png</file>
+        <file>Salad.png</file>
+        <file>Wall.png</file>
+    </qresource>
+</RCC>
