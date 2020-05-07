@@ -5,7 +5,7 @@ add redge 0 1
 show graph
 show structure
 weight
-random 10 30
+random 10 15
 show graph
 show structure
 delete node 5
@@ -42,7 +42,311 @@ add redge 5 7
 show graph
 show structure
 weight
-random 10 30
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+end
+matrix 0 0
+add node
+add node
+add redge 0 1
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+add node
+add node
+add redge 5 7
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+end
+matrix 0 0
+add node
+add node
+add redge 0 1
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+add node
+add node
+add redge 5 7
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+end
+matrix 0 0
+add node
+add node
+add redge 0 1
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+add node
+add node
+add redge 5 7
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+end
+matrix 0 0
+add node
+add node
+add redge 0 1
+show graph
+show structure
+weight
+random 10 15
+show graph
+show structure
+delete node 5
+delete redge 7 8
+show graph
+show structure
+connectivity
+components
+acyclicity
+check tree
+Dijkstra
+Dijkstra 3
+Dijkstra 2 5
+Floyd
+Floyd 3
+Floyd 2 5
+Bellman Ford
+Bellman Ford 3
+Bellman Ford 2 5
+depth first 0
+depth first 1
+depth first topological sorting
+depth first spanning tree 0
+depth first spanning tree 1
+Kahn
+Kruskal
+reverse delete
+another
+show graph
+show structure
+add node
+add node
+add redge 5 7
+show graph
+show structure
+weight
+random 10 15
 show graph
 show structure
 delete node 5
@@ -81,44 +385,7 @@ add redge 0 1
 show graph
 show structure
 weight
-random 10 30
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-add node
-add node
-add redge 5 7
-show graph
-show structure
-weight
-random 10 30
+random 10 15
 show graph
 show structure
 delete node 5
@@ -157,7 +424,7 @@ add redge 0 1 5
 show graph
 show structure
 weight
-random 10 30
+random 10 15
 show graph
 show structure
 delete node 5
@@ -194,11 +461,11 @@ add redge 5 7 2
 show graph
 show structure
 weight
-random 10 30
+random 10 15
 show graph
 show structure
 delete node 5
-delete redge 7 9
+delete redge 7 8
 show graph
 show structure
 connectivity
@@ -233,7 +500,7 @@ add redge 0 1 5
 show graph
 show structure
 weight
-random 10 30
+random 10 15
 show graph
 show structure
 delete node 5
@@ -248,8 +515,8 @@ Dijkstra
 Dijkstra 3
 Dijkstra 2 5
 Floyd
-Floyd 10
-Floyd 20 5
+Floyd 3
+Floyd 2 5
 Bellman Ford
 Bellman Ford 3
 Bellman Ford 2 5

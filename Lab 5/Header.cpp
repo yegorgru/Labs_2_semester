@@ -32,6 +32,7 @@ adjacencyMatrix::adjacencyMatrix(bool weighted, bool directed, size_t number_of_
 {
 	this->weighted = weighted;
 	this->directed = directed;
+	this->structure = 0;
 	if ((directed && number_of_edges <= number_of_nodes * (number_of_nodes - 1)) || (!directed && number_of_edges <= (number_of_nodes * (number_of_nodes - 1)) / 2)) {
 		matrix.assign(number_of_nodes, std::vector<int>(number_of_nodes, 11));
 		long long copy_number_edges = number_of_edges;
@@ -58,7 +59,7 @@ adjacencyMatrix::adjacencyMatrix(bool weighted, bool directed, size_t number_of_
 			for (size_t i = 0; i < number_of_nodes; i++) {
 				for (size_t j = 0; j < number_of_nodes; j++) {
 					if (matrix[i][j] == 11) {
-						matrix[i][j] = 0;
+						matrix[i][j] = INT_MAX;
 					}
 				}
 			}
@@ -82,9 +83,9 @@ adjacencyMatrix::adjacencyMatrix(bool weighted, bool directed, size_t number_of_
 					continue;
 				}
 				else {
-					matrix[first_node][second_node] = 0;
+					matrix[first_node][second_node] = INT_MAX;
 					if (!directed) {
-						matrix[second_node][first_node] = 0;
+						matrix[second_node][first_node] = INT_MAX;
 					}
 				}
 			}
@@ -114,7 +115,11 @@ adjacencyMatrix::adjacencyMatrix(adjacencyStructure& another)
 {
 	this->directed = another.directed;
 	this->weighted = another.weighted;
-	matrix.assign(another.nodes.size(), std::vector<int>(another.nodes.size(), 0));
+	this->structure = 0;
+	matrix.assign(another.nodes.size(), std::vector<int>(another.nodes.size(), INT_MAX));
+	for (size_t i = 0; i < matrix.size(); i++) {
+		matrix[i][i] = 0;
+	}
 	for (size_t i = 0; i < another.nodes.size(); i++) {
 		for (size_t j = 0; j < another.nodes[i].size(); j++) {
 			if (weighted) {
@@ -132,7 +137,7 @@ void adjacencyMatrix::add_redge(size_t first_node, size_t second_node)
 	if (first_node < matrix.size() && second_node < matrix.size()) {
 		if (first_node != second_node) {
 			if (!(this->weighted)) {
-				if (matrix[first_node][second_node]==0) {
+				if (matrix[first_node][second_node]==INT_MAX) {
 					matrix[first_node][second_node] = 1;
 					if (!this->directed) {
 						matrix[second_node][first_node] = 1;
@@ -160,8 +165,8 @@ void adjacencyMatrix::add_redge(size_t first_node, size_t second_node, int weigh
 	if (first_node < matrix.size() && second_node < matrix.size()) {
 		if (first_node != second_node) {
 			if (this->weighted) {
-				if (weight != 0) {
-					if (matrix[first_node][second_node] == 0) {
+				//if (weight != 0) {
+					if (matrix[first_node][second_node] == INT_MAX) {
 						matrix[first_node][second_node] = weight;
 						if (!this->directed) {
 							matrix[second_node][first_node] = weight;
@@ -170,10 +175,10 @@ void adjacencyMatrix::add_redge(size_t first_node, size_t second_node, int weigh
 					else {
 						throw GraphErr("Edge with those nodes already exists");
 					}
-				}
+				/*}
 				else {
 					throw GraphErr("Weight can't be 0");
-				}
+				}*/
 			}
 			else {
 				throw GraphErr("This type of function only for weighted graphs");
@@ -191,10 +196,10 @@ void adjacencyMatrix::add_redge(size_t first_node, size_t second_node, int weigh
 void adjacencyMatrix::add_node()
 {
 	for (auto& i : matrix) {
-		i.resize(matrix.size() + 1, 0);
+		i.resize(matrix.size() + 1, INT_MAX);
 	}
-	size_t size = matrix.size() + 1;
-	std::vector<int>to_add(size, 0);
+	std::vector<int>to_add(matrix.size(), INT_MAX);
+	to_add.push_back(0);
 	matrix.push_back(to_add);
 }
 
@@ -202,11 +207,11 @@ int adjacencyMatrix::delete_redge(size_t first_node, size_t second_node)
 {
 	if (first_node < matrix.size() && second_node < matrix.size()) {
 		if (first_node != second_node) {
-			if (matrix[first_node][second_node] != 0) {
+			if (matrix[first_node][second_node] != INT_MAX) {
 				int weight = matrix[first_node][second_node];
-				matrix[first_node][second_node] = 0;
+				matrix[first_node][second_node] = INT_MAX;
 				if (!directed) {
-					matrix[second_node][first_node] = 0;
+					matrix[second_node][first_node] = INT_MAX;
 				}
 				return weight;
 			}
@@ -255,20 +260,20 @@ void adjacencyMatrix::show()
 		many_edges = false;
 		std::cout << "Node " << i;
 		for (size_t j = 0; j < matrix.size();j++) {
-			if (!one_edge && matrix[i][j]!=0) {
+			if (!one_edge && matrix[i][j]!=INT_MAX && i!=j) {
 				std::cout << " linked with " << j;
 				if (weighted) {
 					std::cout << '(' << matrix[i][j] << ')';
 				}
 				one_edge = true;
 			}
-			else if(many_edges && matrix[i][j] != 0){
+			else if(many_edges && matrix[i][j] != INT_MAX && i != j){
 				std::cout << " " << j;
 				if (weighted) {
 					std::cout << '(' << matrix[i][j] << ')';
 				}
 			}
-			else if (one_edge && matrix[i][j] != 0) {
+			else if (one_edge && matrix[i][j] != INT_MAX && i != j) {
 				std::cout << " " << j;
 				if (weighted) {
 					std::cout << '(' << matrix[i][j] << ')';
@@ -300,7 +305,12 @@ void adjacencyMatrix::show_structure()
 		for (size_t i = 0; i < matrix.size(); i++) {
 			std::cout << i;
 			for (size_t j = 0; j < matrix.size(); j++) {
-				std::cout << '\t' << matrix[i][j];
+				if (matrix[i][j] != INT_MAX) {
+					std::cout << '\t' << matrix[i][j];
+				}
+				else {
+					std::cout << "\t-";
+				}
 			}
 			std::cout << std::endl;
 		}
@@ -328,17 +338,16 @@ std::string adjacencyMatrix::is_connected_graph()
 		}
 	}
 	else if (directed) {
-		adjacencyMatrix new_graph(*this);
+		adjacencyMatrix new_graph(0,0,matrix.size(),0);
 		for (size_t i = 0; i < matrix.size(); i++) {
-			for (size_t j = 0; j < matrix.size(); j++) {
-				if (new_graph.matrix[i][j] != 0) {
-					new_graph.matrix[i][j] = 1;
-					new_graph.matrix[j][i] = 1;
+			for (size_t j = i+1; j < matrix.size(); j++) {
+				if (new_graph.matrix[i][j] != INT_MAX) {
+					new_graph.add_redge(i, j);
 				}
 			}
 		}
 		for_components.clear();
-		find_components(for_components);
+		new_graph.find_components(for_components);
 		if (for_components.size() == 1) {
 			return "weakly connected graph";
 		}
@@ -351,7 +360,7 @@ void adjacencyMatrix::find_nodes(size_t node, std::vector<bool>& for_check, std:
 	for_check[node] = 1;
 	component.push_back(node);
 	for (size_t i = 0; i < matrix[node].size(); i++) {
-		if (matrix[node][i] != 0 && for_check[i] != 1) {
+		if (matrix[node][i] != INT_MAX && node!=i && for_check[i] != 1) {
 			find_nodes(i, for_check, component);
 		}
 	}
@@ -384,7 +393,7 @@ adjacencyMatrix adjacencyMatrix::build_reverse()const
 		}
 		for (size_t i = 0; i < matrix.size(); i++) {
 			for (size_t j = 0; j < matrix.size(); j++) {
-				if (matrix[i][j] != 0) {
+				if (matrix[i][j] != INT_MAX && i!=j) {
 					if (weighted) {
 						reverse.add_redge(j, i, matrix[i][j]);
 					}
@@ -404,7 +413,7 @@ adjacencyMatrix adjacencyMatrix::build_reverse()const
 void dfs1(const adjacencyMatrix& graph,size_t v, std::vector<bool>&used, std::vector<size_t>& order) {
 	used[v] = true;
 	for (size_t i = 0; i < graph.matrix.size(); i++) {
-		if (used[i] == false && graph.matrix[v][i]!=0) {
+		if (used[i] == false && graph.matrix[v][i]!=INT_MAX && i!=v) {
 			dfs1(graph,i,used,order);
 		}
 	}
@@ -415,7 +424,7 @@ void dfs2(const adjacencyMatrix& graph, size_t v, std::vector<bool>& used, std::
 	used[v] = true;
 	component.push_back(v);
 	for (size_t i = 0; i < graph.matrix.size(); i++) {
-		if (used[i] == false && graph.matrix[v][i] != 0) {
+		if (used[i] == false && graph.matrix[v][i] != INT_MAX && v!=i) {
 			dfs2(graph, i, used, order, component);
 		}
 	}
@@ -424,7 +433,7 @@ void dfs2(const adjacencyMatrix& graph, size_t v, std::vector<bool>& used, std::
 void dfs1(const adjacencyStructure& graph, size_t v, std::vector<bool>& used, std::vector<size_t>& order) {
 	used[v] = true;
 	for (size_t i = 0; i < graph.nodes[v].size(); i++) {
-		if (used[i] == false) {
+		if (used[graph.nodes[v][i]] == false) {
 			dfs1(graph, graph.nodes[v][i], used, order);
 		}
 	}
@@ -435,7 +444,7 @@ void dfs2(const adjacencyStructure& graph, size_t v, std::vector<bool>& used, st
 	used[v] = true;
 	component.push_back(v);
 	for (size_t i = 0; i < graph.nodes[v].size(); i++) {
-		if (used[i] == false) {
+		if (used[graph.nodes[v][i]] == false) {
 			dfs2(graph, graph.nodes[v][i], used, order, component);
 		}
 	}
@@ -469,22 +478,48 @@ void adjacencyMatrix::find_strong_components(std::vector<std::vector<size_t>>& f
 
 std::vector<int> adjacencyMatrix::dijkstra_algorithm(size_t node)
 {
-	if (node < matrix.size()) {
+	/*if (node < matrix.size()) {
 		std::vector<bool>marks(matrix.size(), 0);
-		std::vector<int>ways(matrix.size(), INT_MAX / 2);
+		std::vector<int>ways(matrix.size(), INT_MAX);
 		ways[node] = 0;
 		dijkstra_help(node, ways, marks);
 		return ways;
 	}
 	else {
 		throw GraphErr("Incorrect node");
+	}*/
+	std::vector <int> answer(matrix.size(), INT_MAX);
+	answer[node] = 0;
+	std::vector <bool> checked(matrix.size(), 0);
+	int min_distance = 0;
+	size_t min_node = node;
+	while (min_distance < INT_MAX)
+	{
+		size_t current = min_node;
+		checked[current] = true;
+		for (size_t i = 0; i < matrix.size(); i++) {
+			if (current != i && answer[current] != INT_MAX && matrix[current][i] != INT_MAX) {
+				if (answer[current] + matrix[current][i] < answer[i]) {
+					answer[i] = answer[current] + matrix[current][i];
+				}
+			}
+		}
+		min_distance = INT_MAX;
+		for (size_t i = 0; i < matrix.size(); i++) {
+			if (checked[i] == false && answer[i] < min_distance)
+			{
+				min_distance = answer[i];
+				min_node = i;
+			}
+		}
 	}
+	return answer;
 }
 
 void adjacencyMatrix::dijkstra_help(size_t node, std::vector<int>&ways, std::vector<bool>& marks) {
 	std::vector<node_struct>sorted;
 	for (size_t i = 0; i < matrix.size(); i++) {
-		if (matrix[node][i] != 0 && marks[i]!=1) {
+		if (matrix[node][i] != INT_MAX && i!=node && marks[i]!=1) {
 			sorted.push_back({ matrix[node][i], i});
 		}
 	}
@@ -507,43 +542,50 @@ void adjacencyMatrix::dijkstra_help(size_t node, std::vector<int>&ways, std::vec
 
 std::vector<std::vector<int>> adjacencyMatrix::floyd_algorithm()
 {
-	std::vector<std::vector<std::vector<int>>>ways(matrix.size()+1, std::vector<std::vector<int>>(matrix.size(), std::vector<int>(matrix.size())));
+	if (matrix.size() > 0) {
+		std::vector<std::vector<std::vector<int>>>ways(matrix.size() + 1, std::vector<std::vector<int>>(matrix.size(), std::vector<int>(matrix.size())));
 
-	for (size_t i = 0; i < matrix.size(); i++) {
-		for (size_t j = 0; j < matrix.size(); j++) {
-			if (i == j) {
-				ways[0][i][j] = 0;
-			}
-			else if (matrix[i][j] == 0) {
-				ways[0][i][j] = INT_MAX/2;
-			}
-			else {
-				ways[0][i][j] = matrix[i][j];
-			}
-		}
-	}
-	for (size_t k = 1; k < matrix.size() + 1; k++) {
 		for (size_t i = 0; i < matrix.size(); i++) {
 			for (size_t j = 0; j < matrix.size(); j++) {
-				ways[k][i][j] = min(ways[k - 1][i][j], ways[k - 1][i][k - 1] + ways[k - 1][k - 1][j]);
+				if (i == j) {
+					ways[0][i][j] = 0;
+				}
+				else {
+					ways[0][i][j] = matrix[i][j];
+				}
 			}
 		}
+		for (size_t k = 1; k < matrix.size() + 1; k++) {
+			for (size_t i = 0; i < matrix.size(); i++) {
+				for (size_t j = 0; j < matrix.size(); j++) {
+					if (ways[k - 1][i][k - 1] != INT_MAX && ways[k - 1][k - 1][j] != INT_MAX) {
+						ways[k][i][j] = min(ways[k - 1][i][j], ways[k - 1][i][k - 1] + ways[k - 1][k - 1][j]);
+					}
+					else {
+						ways[k][i][j] = ways[k - 1][i][j];
+					}
+				}
+			}
+		}
+		return ways[matrix.size()];
 	}
-	return ways[matrix.size()];
+	else {
+		throw GraphErr("This graph has no nodes");
+	}
 }
 
 std::vector<int> adjacencyMatrix::bellman_ford_algorithm(size_t node)
 {
 	if (node < matrix.size()) {
-		std::vector<int>answer(matrix.size(), INT_MAX / 2);
-		std::vector <std::vector<int>> ways(matrix.size(), std::vector<int>(matrix.size(), INT_MAX / 2));
+		/*std::vector<int>answer(matrix.size(), INT_MAX);
+		std::vector <std::vector<int>> ways(matrix.size(), std::vector<int>(matrix.size(), INT_MAX));
 		ways[0][node] = 0;
 		for (size_t k = 1; k < matrix.size(); k++) {
 			for (size_t i = 0; i < matrix.size(); i++)
 			{
 				ways[k][i] = ways[k - 1][i];
 				for (size_t j = 0; j < matrix.size(); j++) {
-					if (i != j && matrix[i][j] != 0) {
+					if (i!=j && matrix[i][j] != INT_MAX && ways[k - 1][j]!= INT_MAX) {
 						if (ways[k - 1][j] + matrix[j][i] < ways[k][i]) {
 							ways[k][i] = ways[k - 1][j] + matrix[j][i];
 						}
@@ -553,6 +595,20 @@ std::vector<int> adjacencyMatrix::bellman_ford_algorithm(size_t node)
 		}
 		for (size_t i = 0; i < answer.size(); i++) {
 			answer[i] = ways[matrix.size() - 1][i];
+		}
+		return answer;*/
+		std::vector <int> answer(matrix.size(), INT_MAX);
+		answer[node] = 0;
+		for (size_t k = 1; k < matrix.size(); k++) {
+			for (size_t i = 0; i < matrix.size(); i++) {
+				for (size_t j = 0; j < matrix.size(); j++) {
+					if (answer[j] != INT_MAX && matrix[j][i] != INT_MAX) {
+						if (answer[j] + matrix[j][i] < answer[i]) {
+							answer[i] = answer[j] + matrix[j][i];
+						}
+					}
+				}
+			}
 		}
 		return answer;
 	}
@@ -584,7 +640,7 @@ void adjacencyMatrix::depth_first(size_t node, std::vector<bool>&checked, bool i
 	if (!important_weight) {
 		for (size_t i=0;i<matrix.size();i++)
 		{
-			if (matrix[node][i] != 0 && checked[i]==false) {
+			if (matrix[node][i] != INT_MAX && i!=node && checked[i]==false) {
 				std::stack<size_t>st;
 				st.emplace(i);
 				while (!st.empty())
@@ -598,7 +654,7 @@ void adjacencyMatrix::depth_first(size_t node, std::vector<bool>&checked, bool i
 					size_t what_found;
 					for (size_t j = 0; j < matrix.size(); j++)
 					{
-						if (matrix[p][j] != 0 && checked[j] == false) {
+						if (matrix[p][j] != INT_MAX && p!=j && checked[j] == false) {
 							found = true;
 							what_found = j;
 							break;
@@ -617,11 +673,13 @@ void adjacencyMatrix::depth_first(size_t node, std::vector<bool>&checked, bool i
 	else {
 		std::vector<node_struct>sorted;
 		for (size_t i = 0; i < matrix.size(); i++) {
-			if (matrix[node][i] != 0 && checked[i] != 1) {
+			if (matrix[node][i] != INT_MAX && node!=i && checked[i] != 1) {
 				sorted.push_back({ matrix[node][i], i });
 			}
 		}
-		quicksort(sorted, 0, sorted.size() - 1);
+		if (sorted.size() > 1) {
+			quicksort(sorted, 0, sorted.size() - 1);
+		}
 		for (auto& i:sorted)
 		{
 			if (matrix[node][i.node] != 0 && checked[i.node] == false) {
@@ -636,7 +694,7 @@ void adjacencyMatrix::depth_first(size_t node, std::vector<bool>&checked, bool i
 					}
 					std::vector<node_struct>sorted2;
 					for (size_t j = 0; j < matrix.size(); j++) {
-						if (matrix[p][j] != 0 && checked[j] == 0) {
+						if (matrix[p][j] != INT_MAX && p!=j && checked[j] == 0) {
 							sorted2.push_back({ matrix[p][j], j });
 						}
 					}
@@ -667,7 +725,7 @@ adjacencyMatrix adjacencyMatrix::depth_first_spanning_tree(bool important_weight
 			if (!important_weight) {
 				for (size_t i = 0; i < matrix.size(); i++)
 				{
-					if (matrix[0][i] != 0 && checked[i] == false) {
+					if (matrix[0][i] != INT_MAX && i!=0 && checked[i] == false) {
 						std::stack<size_t>st;
 						st.emplace(i);
 						size_t parent_node = 0;
@@ -688,7 +746,7 @@ adjacencyMatrix adjacencyMatrix::depth_first_spanning_tree(bool important_weight
 							size_t what_found;
 							for (size_t j = 0; j < matrix.size(); j++)
 							{
-								if (matrix[p][j] != 0 && checked[j] == false) {
+								if (matrix[p][j] != INT_MAX && p!=j && checked[j] == false) {
 									found = true;
 									what_found = j;
 									break;
@@ -709,14 +767,14 @@ adjacencyMatrix adjacencyMatrix::depth_first_spanning_tree(bool important_weight
 			else {
 				std::vector<node_struct>sorted;
 				for (size_t i = 0; i < matrix.size(); i++) {
-					if (matrix[0][i] != 0 && checked[i] != 1) {
+					if (matrix[0][i] != INT_MAX && i!=0 && checked[i] != 1) {
 						sorted.push_back({ matrix[0][i], i });
 					}
 				}
 				quicksort(sorted, 0, sorted.size() - 1);
 				for (auto& i : sorted)
 				{
-					if (matrix[0][i.node] != 0 && checked[i.node] == false) {
+					if (matrix[0][i.node] != INT_MAX && 0!=i.node && checked[i.node] == false) {
 						std::stack<size_t>st;
 						st.emplace(i.node);
 						size_t parent_node = 0;
@@ -735,7 +793,7 @@ adjacencyMatrix adjacencyMatrix::depth_first_spanning_tree(bool important_weight
 							}
 							std::vector<node_struct>sorted2;
 							for (size_t j = 0; j < matrix.size(); j++) {
-								if (matrix[p][j] != 0 && checked[j] == 0) {
+								if (matrix[p][j] != INT_MAX && p!=j && checked[j] == 0) {
 									sorted2.push_back({ matrix[p][j], j });
 								}
 							}
@@ -771,7 +829,7 @@ adjacencyMatrix adjacencyMatrix::minimum_spanning_tree_kruskal()
 		}
 		for (size_t i = 0; i < matrix.size(); i++) {
 			for (size_t j = i+1; j < matrix.size(); j++) {
-				if (matrix[i][j] != 0) {
+				if (matrix[i][j] != INT_MAX) {
 					ways.push_back({ matrix[i][j] ,i,j });
 				}
 			}
@@ -803,7 +861,7 @@ adjacencyMatrix adjacencyMatrix::minimum_spanning_reverse_delete()
 		std::vector<way_struct>edges;
 		for (size_t i = 0; i < matrix.size(); i++) {
 			for (size_t j = i+1; j < matrix.size(); j++) {
-				if (matrix[i][j] != 0) {
+				if (matrix[i][j] != INT_MAX && i!=j) {
 					edges.push_back({ matrix[i][j] ,i,j });
 				}
 			}
@@ -843,10 +901,10 @@ bool adjacencyMatrix::check_cyclic(size_t node, std::vector<char>& checked,size_
 {
 	checked[node] = 2;
 	for (size_t i = 0; i < matrix.size(); i++) {
-		if (matrix[node][i] != 0 && i != parent && checked[i] == 2) {
+		if (matrix[node][i] != INT_MAX && node!=i && i != parent && checked[i] == 2) {
 			return true;
 		}
-		else if (matrix[node][i] != 0 && i != parent) {
+		else if (matrix[node][i] != INT_MAX && node != i && i != parent) {
 			check_cyclic(i, checked, node);
 		}
 	}
@@ -864,7 +922,7 @@ std::vector<size_t> adjacencyMatrix::topological_sorting_kahn()
 		for (size_t i = 0; i < matrix.size(); i++) {
 			size_t in_degree = 0;
 			for (size_t j = 0; j < matrix.size(); j++) {
-				if (matrix[j][i] != 0) {
+				if (matrix[j][i] != INT_MAX && i!=j) {
 					in_degree++;
 				}
 			}
@@ -877,7 +935,7 @@ std::vector<size_t> adjacencyMatrix::topological_sorting_kahn()
 			order.push_back(start_elements.front());
 			was_there++;
 			for (size_t i = 0; i < matrix.size(); i++) {
-				if (matrix[start_elements.front()][i] != 0) {
+				if (matrix[start_elements.front()][i] != INT_MAX && start_elements.front()!=i) {
 					in_degrees[i]--;
 					if (in_degrees[i] == 0) {
 						start_elements.push(i);
@@ -904,34 +962,83 @@ adjacencyStructure::adjacencyStructure(bool weighted, bool directed, size_t numb
 {
 	this->weighted = weighted;
 	this->directed = directed;
+	this->structure = 1;
 	if ((directed && number_of_edges <= number_of_nodes * (number_of_nodes - 1)) || (!directed && number_of_edges <= (number_of_nodes * (number_of_nodes - 1)) / 2)) {
 		nodes.assign(number_of_nodes,std::vector<size_t>());
 		if (weighted) {
 			weights.assign(number_of_nodes, std::vector<int>());
 		}
-		size_t copy_number_edges = number_of_edges;
-		std::vector<edge_struct>all_edges;
-		for (size_t i = 0; i < copy_number_edges; i++) {
-			size_t first_node = mersenne() % number_of_nodes;
-			size_t second_node = mersenne() % number_of_nodes;
-			if (first_node == second_node || find(first_node, second_node)) {
-				copy_number_edges++;
+		if ((directed && number_of_edges <= number_of_nodes * (number_of_nodes - 1) / 2) || (!directed && number_of_edges <= (number_of_nodes * (number_of_nodes - 1)) / 4)) {
+			size_t copy_number_edges = number_of_edges;
+			std::vector<edge_struct>all_edges;
+			for (size_t i = 0; i < copy_number_edges; i++) {
+				size_t first_node = mersenne() % number_of_nodes;
+				size_t second_node = mersenne() % number_of_nodes;
+				if (first_node == second_node || find(first_node, second_node)) {
+					copy_number_edges++;
+				}
+				else {
+					if (weighted) {
+						int weight = 1 + mersenne() % 10;
+						nodes[first_node].push_back(second_node);
+						weights[first_node].push_back(weight);
+						if (!directed) {
+							nodes[second_node].push_back(first_node);
+							weights[second_node].push_back(weight);
+						}
+					}
+					else {
+						nodes[first_node].push_back(second_node);
+						if (!directed) {
+							nodes[second_node].push_back(first_node);
+						}
+					}
+				}
 			}
-			else {
-				if (weighted) {
-					int weight = 1 + mersenne() % 10;
-					nodes[first_node].push_back(second_node);
-					weights[first_node].push_back(weight);
-					if (!directed) {
-						nodes[second_node].push_back(first_node);
-						weights[second_node].push_back(weight);
+		}
+		else {
+			for (size_t i = 0; i < number_of_nodes; i++) {
+				if (directed) {
+					for (size_t j = 0; j < number_of_nodes; j++) {
+						if (i != j) {
+							if (weighted) {
+								int weight = 1 + mersenne() % 10;
+								add_redge(i, j, weight);
+							}
+							else {
+								add_redge(i, j);
+							}
+						}
 					}
 				}
 				else {
-					nodes[first_node].push_back(second_node);
-					if (!directed) {
-						nodes[second_node].push_back(first_node);
+					for (size_t j = i + 1; j < number_of_nodes; j++) {
+						if (weighted) {
+							int weight = 1 + mersenne() % 10;
+							add_redge(i, j, weight);
+						}
+						else {
+							add_redge(i, j);
+						}
 					}
+				}
+			}
+			size_t number_to_delete = 0;
+			if (directed) {
+				number_to_delete = number_of_nodes * (number_of_nodes - 1)-number_of_edges;
+			}
+			else {
+				number_to_delete = number_of_nodes * (number_of_nodes - 1)/2 - number_of_edges;
+			}
+			for (size_t i = 0; i < number_to_delete; i++) {
+				try
+				{
+					size_t first = mersenne() % number_of_nodes;
+					size_t second = mersenne() % number_of_nodes;
+				}
+				catch (const std::exception&)
+				{
+					number_to_delete++;
 				}
 			}
 		}
@@ -945,13 +1052,14 @@ adjacencyStructure::adjacencyStructure(const adjacencyMatrix& another)
 {
 	this->directed = another.directed;
 	this->weighted = another.weighted;
+	this->structure = 1;
 	nodes.assign(another.matrix.size(), std::vector<size_t>());
 	if (weighted) {
 		weights.assign(another.matrix.size(), std::vector<int>());
 	}
 	for (size_t i = 0; i < another.matrix.size(); i++) {
 		for (size_t j = 0; j < another.matrix.size(); j++) {
-			if (another.matrix[i][j] != 0) {
+			if (another.matrix[i][j] != INT_MAX && i!=j) {
 				nodes[i].push_back(j);
 				if (weighted) {
 					weights[i].push_back(another.matrix[i][j]);
@@ -1009,7 +1117,7 @@ void adjacencyStructure::add_redge(size_t first_node, size_t second_node, int we
 	if (first_node < nodes.size() && second_node < nodes.size()) {
 		if (first_node != second_node) {
 			if (this->weighted) {
-				if (weight != 0) {
+				//if (weight != 0) {
 					if (!(this->find(first_node, second_node))) {
 						nodes[first_node].push_back(second_node);
 						weights[first_node].push_back(weight);
@@ -1021,10 +1129,10 @@ void adjacencyStructure::add_redge(size_t first_node, size_t second_node, int we
 					else {
 						throw GraphErr("Edge with those nodes already exists");
 					}
-				}
+				/*}
 				else {
 					throw GraphErr("Weight can't be 0");
-				}
+				}*/
 			}
 			else {
 				throw GraphErr("This type of function only for weighted graphs");
@@ -1079,7 +1187,12 @@ void adjacencyStructure::show_structure()
 			std::cout << "Node " << i << " :";
 			if (nodes[i].size() > 0) {
 				for (size_t j = 0; j < nodes[i].size(); j++) {
-					std::cout << '\t' << nodes[i][j];
+					if (nodes[i][j] == INT_MAX) {
+						std::cout << "\t-";
+					}
+					else {
+						std::cout << '\t' << nodes[i][j];
+					}
 				}
 			}
 			else {
@@ -1198,7 +1311,7 @@ bool adjacencyStructure::check_cyclic(size_t node, std::vector<char>& checked, s
 {
 	checked[node] = 2;
 	for (size_t i = 0; i < nodes[node].size(); i++) {
-		if (nodes[node][i] != parent && checked[i] == 2) {
+		if (nodes[node][i] != parent && checked[nodes[node][i]] == 2) {
 			return true;
 		}
 		else if (nodes[node][i] != parent) {
@@ -1227,21 +1340,16 @@ std::string adjacencyStructure::is_connected_graph()
 		}
 	}
 	else if (directed) {
-		adjacencyStructure new_graph(*this);
+		adjacencyStructure new_graph(0,0,nodes.size(),0);
 		for (size_t i = 0; i < nodes.size(); i++) {
 			for (size_t j = 0; j < nodes[i].size(); j++) {
-				if (find(nodes[i][j], i) == false) {
-					if (weighted) {
-						new_graph.add_redge(nodes[i][j], i,weights[i][j]);
-					}
-					else {
-						new_graph.add_redge(nodes[i][j], i);
-					}
+				if(nodes[i][j]>i){
+					new_graph.add_redge(nodes[i][j], i);
 				}
 			}
 		}
 		for_components.clear();
-		find_components(for_components);
+		new_graph.find_components(for_components);
 		if (for_components.size() == 1) {
 			return "weakly connected graph";
 		}
@@ -1331,16 +1439,51 @@ void adjacencyStructure::find_strong_components(std::vector<std::vector<size_t>>
 
 std::vector<int> adjacencyStructure::dijkstra_algorithm(size_t node)
 {
-	if (node < nodes.size()) {
+	/*if (node < nodes.size()) {
 		std::vector<bool>marks(nodes.size(), 0);
-		std::vector<int>ways(nodes.size(), INT_MAX / 2);
+		std::vector<int>ways(nodes.size(), INT_MAX);
 		ways[node] = 0;
 		dijkstra_help(node, ways, marks);
 		return ways;
 	}
 	else {
 		throw GraphErr("Incorrect node");
+	}*/
+	std::vector <int> answer(nodes.size(), INT_MAX);
+	answer[node] = 0;
+	std::vector <bool> checked(nodes.size(), 0);
+	int min_distance = 0;
+	size_t min_node = node;
+	while (min_distance < INT_MAX)
+	{
+		size_t current = min_node;
+		checked[current] = true;
+		for (size_t i = 0; i < nodes[current].size(); i++) {
+			if (weighted) {
+				if (answer[current] != INT_MAX && weights[current][i] != INT_MAX) {
+					if (answer[current] + weights[current][i] < answer[nodes[current][i]]) {
+						answer[nodes[current][i]] = answer[current] + weights[current][i];
+					}
+				}
+			}
+			else {
+				if (answer[current] != INT_MAX) {
+					if (answer[current] + 1 < answer[nodes[current][i]]) {
+						answer[nodes[current][i]] = answer[current] + 1;
+					}
+				}
+			}
+		}
+		min_distance = INT_MAX;
+		for (size_t i = 0; i < nodes[current].size(); i++) {
+			if (checked[nodes[current][i]] == false && answer[nodes[current][i]] < min_distance)
+			{
+				min_distance = answer[nodes[current][i]];
+				min_node = nodes[current][i];
+			}
+		}
 	}
+	return answer;
 }
 
 void adjacencyStructure::dijkstra_help(size_t node, std::vector<int>& ways, std::vector<bool>& marks) {
@@ -1374,9 +1517,16 @@ void adjacencyStructure::dijkstra_help(size_t node, std::vector<int>& ways, std:
 
 std::vector<std::vector<int>> adjacencyStructure::floyd_algorithm()
 {
-	adjacencyMatrix matrix(*this);
-	std::vector<std::vector<int>>ways=matrix.floyd_algorithm();
-	return ways;
+	try
+	{
+		adjacencyMatrix matrix(*this);
+		std::vector<std::vector<int>>ways = matrix.floyd_algorithm();
+		return ways;
+	}
+	catch (const std::exception& ex)
+	{
+		throw ex;
+	}
 }
 
 std::vector<int> adjacencyStructure::bellman_ford_algorithm(size_t node)
@@ -1457,7 +1607,7 @@ void adjacencyStructure::depth_first(size_t node, std::vector<bool>& checked, bo
 				sorted.push_back({ 1, nodes[node][i] });
 			}
 		}
-		if (weighted) {
+		if (weighted && sorted.size() > 1) {
 			quicksort(sorted, 0, sorted.size() - 1);
 		}
 		for (auto& i : sorted)
@@ -1722,7 +1872,7 @@ std::vector<size_t> adjacencyStructure::topological_sorting_kahn()
 		for (size_t i = 0; i < nodes.size(); i++) {
 			size_t in_degree = 0;
 			for (size_t j = 0; j < nodes.size(); j++) {
-				for (size_t k = 0; k < nodes[j].size(); j++) {
+				for (size_t k = 0; k < nodes[j].size(); k++) {
 					if (nodes[j][k] == i) {
 						in_degree++;
 					}
@@ -2015,6 +2165,7 @@ void commands() {
 	while (true) {
 		std::string input;
 		std::getline(std::cin, input);
+		std::cout << std::endl << std::endl << std::endl << input << std::endl << std::endl << std::endl << std::endl << std::endl;
 		std::stringstream ss;
 		ss.str(input);
 		std::string part;
@@ -2148,13 +2299,14 @@ void benchmark()
 	std::cout << "In process..."<<std::endl;
 	benchmark_piece_matrix(0, 0,benchm);
 	benchmark_piece_matrix(0, 1, benchm);
-	benchmark_piece_matrix(1, 0, benchm);
+ 	benchmark_piece_matrix(1, 0, benchm);
 	benchmark_piece_matrix(1, 1, benchm);
 	benchmark_piece_structure(0, 0, benchm);
 	benchmark_piece_structure(0, 1, benchm);
 	benchmark_piece_structure(1, 0, benchm);
 	benchmark_piece_structure(1, 1, benchm);
 	std::cout << "Check benchmark.txt" << std::endl;
+	benchm.close();
 }
 
 void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
@@ -2176,8 +2328,8 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 	clock_t start;
 	clock_t finish;
 	double Time = 0;
-	int count = 10;
-	while (Time <= 1 && count < 100001) {
+	int count = 1;
+	while (Time <= 1 && count < 101) {
 		count *= 10;
 		benchm << count << "\t\t";
 		start = clock();
@@ -2209,7 +2361,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		start = clock();
 		std::string a=matrix.is_connected_graph();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2217,7 +2369,12 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		{
 			std::vector<std::vector<size_t>>comp;
 			start = clock();
-			matrix.find_components(comp);
+			if (directed) {
+				matrix.find_strong_components(comp);
+			}
+			else {
+				matrix.find_components(comp);
+			}
 			finish = clock();
 			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2429,7 +2586,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		size_t size = sizeof(int) * count * count;
 		benchm << size<<'\n';
 	}
-	while (Time <= 10 && count < 500001) {
+	while (Time <= 10 && count < 501) {
 		count *= 2;
 		benchm << count << "\t\t";
 		start = clock();
@@ -2461,7 +2618,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		start = clock();
 		std::string a = matrix.is_connected_graph();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2469,7 +2626,12 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		{
 			std::vector<std::vector<size_t>>comp;
 			start = clock();
-			matrix.find_components(comp);
+			if (directed) {
+				matrix.find_strong_components(comp);
+			}
+			else {
+				matrix.find_components(comp);
+			}
 			finish = clock();
 			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2702,23 +2864,23 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 	clock_t start;
 	clock_t finish;
 	double Time = 0;
-	int count = 10;
-	while (Time <= 1 && count < 100001) {
+	int count = 1;
+	while (Time <= 1 && count < 101) {
 		count *= 10;
 		benchm << count << "\t\t";
 		start = clock();
-		adjacencyMatrix matrix(0, 0);
+		adjacencyStructure structure(0, 0);
 		if (!directed && !weighted) {
-			matrix = adjacencyMatrix(0, 0, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(0, 0, count, count * (count - 1) / 2);
 		}
 		else if (directed && !weighted) {
-			matrix = adjacencyMatrix(0, 1, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(0, 1, count, count * (count - 1) / 2);
 		}
 		else if (!directed && weighted) {
-			matrix = adjacencyMatrix(1, 0, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(1, 0, count, count * (count - 1) / 2);
 		}
 		else {
-			matrix = adjacencyMatrix(1, 1, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(1, 1, count, count * (count - 1) / 2);
 		}
 		finish = clock();
 		benchm << finish - start << "\t\t\t";
@@ -2726,16 +2888,16 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
 		start = clock();
-		matrix.get_weight();
+		structure.get_weight();
 		finish = clock();
 		benchm << finish - start << "\t\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
 		start = clock();
-		std::string a = matrix.is_connected_graph();
+		std::string a = structure.is_connected_graph();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2743,7 +2905,12 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		{
 			std::vector<std::vector<size_t>>comp;
 			start = clock();
-			matrix.find_components(comp);
+			if (directed) {
+				structure.find_strong_components(comp);
+			}
+			else {
+				structure.find_components(comp);
+			}
 			finish = clock();
 			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2755,14 +2922,14 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			benchm << "--\t\t\t";
 		}
 		start = clock();
-		matrix.is_acyclic();
+		structure.is_acyclic();
 		finish = clock();
 		benchm << finish - start << "\t\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
 		start = clock();
-		matrix.is_tree();
+		structure.is_tree();
 		finish = clock();
 		benchm << finish - start << "\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2772,7 +2939,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		{
 			size_t node = mersenne() % (count - 1);
 			start = clock();
-			std::vector<int>a = matrix.dijkstra_algorithm(node);
+			std::vector<int>a = structure.dijkstra_algorithm(node);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2786,7 +2953,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<std::vector<int>>a = matrix.floyd_algorithm();
+			std::vector<std::vector<int>>a = structure.floyd_algorithm();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2801,7 +2968,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		{
 			size_t node = mersenne() % (count - 1);
 			start = clock();
-			std::vector<int>a = matrix.bellman_ford_algorithm(node);
+			std::vector<int>a = structure.bellman_ford_algorithm(node);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2815,7 +2982,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.depth_first(0);
+			std::vector<size_t>a = structure.depth_first(0);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2829,7 +2996,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.depth_first(1);
+			std::vector<size_t>a = structure.depth_first(1);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2843,7 +3010,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.topological_sorting_depth_first();
+			std::vector<size_t>a = structure.topological_sorting_depth_first();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2857,7 +3024,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.depth_first_spanning_tree(0);
+			adjacencyStructure a = structure.depth_first_spanning_tree(0);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2871,7 +3038,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.depth_first_spanning_tree(1);
+			adjacencyStructure a = structure.depth_first_spanning_tree(1);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2885,7 +3052,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.topological_sorting_kahn();
+			std::vector<size_t>a = structure.topological_sorting_kahn();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2899,7 +3066,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.minimum_spanning_tree_kruskal();
+			adjacencyStructure a = structure.minimum_spanning_tree_kruskal();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2913,7 +3080,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.minimum_spanning_reverse_delete();
+			adjacencyStructure a = structure.minimum_spanning_reverse_delete();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2927,7 +3094,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.build_reverse();
+			adjacencyStructure a = structure.build_reverse();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2941,7 +3108,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyStructure structure(matrix);
+			adjacencyMatrix matrix(structure);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -2955,22 +3122,22 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		size_t size = sizeof(int) * count * count;
 		benchm << size << '\n';
 	}
-	while (Time <= 10 && count < 500001) {
+	while (Time <= 10 && count < 501) {
 		count *= 2;
 		benchm << count << "\t\t";
 		start = clock();
-		adjacencyMatrix matrix(0, 0);
+		adjacencyStructure structure(0, 0);
 		if (!directed && !weighted) {
-			matrix = adjacencyMatrix(0, 0, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(0, 0, count, count * (count - 1) / 2);
 		}
 		else if (directed && !weighted) {
-			matrix = adjacencyMatrix(0, 1, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(0, 1, count, count * (count - 1) / 2);
 		}
 		else if (!directed && weighted) {
-			matrix = adjacencyMatrix(1, 0, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(1, 0, count, count * (count - 1) / 2);
 		}
 		else {
-			matrix = adjacencyMatrix(1, 1, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(1, 1, count, count * (count - 1) / 2);
 		}
 		finish = clock();
 		benchm << finish - start << "\t\t\t\t\t";
@@ -2978,16 +3145,16 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
 		start = clock();
-		matrix.get_weight();
+		structure.get_weight();
 		finish = clock();
 		benchm << finish - start << "\t\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
 		start = clock();
-		std::string a = matrix.is_connected_graph();
+		std::string a = structure.is_connected_graph();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2995,7 +3162,12 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		{
 			std::vector<std::vector<size_t>>comp;
 			start = clock();
-			matrix.find_components(comp);
+			if (directed) {
+				structure.find_strong_components(comp);
+			}
+			else {
+				structure.find_components(comp);
+			}
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3007,16 +3179,16 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			benchm << "--\t\t\t\t";
 		}
 		start = clock();
-		matrix.is_acyclic();
+		structure.is_acyclic();
 		finish = clock();
 		benchm << finish - start << "\t\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
 		start = clock();
-		matrix.is_tree();
+		structure.is_tree();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -3024,7 +3196,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		{
 			size_t node = mersenne() % (count - 1);
 			start = clock();
-			std::vector<int > a = matrix.dijkstra_algorithm(node);
+			std::vector<int > a = structure.dijkstra_algorithm(node);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3038,7 +3210,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<std::vector<int>>a = matrix.floyd_algorithm();
+			std::vector<std::vector<int>>a = structure.floyd_algorithm();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3053,7 +3225,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		{
 			size_t node = mersenne() % (count - 1);
 			start = clock();
-			std::vector<int>a = matrix.bellman_ford_algorithm(node);
+			std::vector<int>a = structure.bellman_ford_algorithm(node);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3067,7 +3239,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.depth_first(0);
+			std::vector<size_t>a = structure.depth_first(0);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3081,7 +3253,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.depth_first(1);
+			std::vector<size_t>a = structure.depth_first(1);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3095,7 +3267,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.topological_sorting_depth_first();
+			std::vector<size_t>a = structure.topological_sorting_depth_first();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3109,7 +3281,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.depth_first_spanning_tree(0);
+			adjacencyStructure a = structure.depth_first_spanning_tree(0);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3123,7 +3295,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.depth_first_spanning_tree(1);
+			adjacencyStructure a = structure.depth_first_spanning_tree(1);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3137,7 +3309,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			std::vector<size_t>a = matrix.topological_sorting_kahn();
+			std::vector<size_t>a = structure.topological_sorting_kahn();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3151,7 +3323,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.minimum_spanning_tree_kruskal();
+			adjacencyStructure a = structure.minimum_spanning_tree_kruskal();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3165,7 +3337,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.minimum_spanning_reverse_delete();
+			adjacencyStructure a = structure.minimum_spanning_reverse_delete();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3179,7 +3351,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyMatrix a = matrix.build_reverse();
+			adjacencyStructure a = structure.build_reverse();
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
@@ -3193,7 +3365,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		try
 		{
 			start = clock();
-			adjacencyStructure structure(matrix);
+			adjacencyMatrix matrix(structure);
 			finish = clock();
 			benchm << finish - start << "\t\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {

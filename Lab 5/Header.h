@@ -2,8 +2,6 @@
 
 #include <iostream>
 #include <vector>
-#include <list>
-#include <map>
 #include <random>
 #include <Windows.h>
 #include <conio.h>
@@ -41,6 +39,7 @@ struct edge_struct {
 	size_t end;
 };
 
+
 class adjacencyStructure;
 
 class adjacencyMatrix {
@@ -49,7 +48,7 @@ class adjacencyMatrix {
 
 	bool weighted;
 	bool directed;
-	bool structure = 0;
+	bool structure;
 public:
 
 	bool what_structure() {
@@ -59,6 +58,7 @@ public:
 	adjacencyMatrix(bool weighted, bool directed) {
 		this->weighted = weighted;
 		this->directed = directed;
+		this->structure = 0;
 	}
 
 	adjacencyMatrix(bool weighted, bool directed, size_t number_of_nodes, size_t number_of_edges);
@@ -83,7 +83,7 @@ public:
 		int counter = 0;
 		for (size_t i = 0; i < matrix.size(); i++) {
 			for (size_t j = 0; j < matrix.size(); j++) {
-				if (matrix[i][j] != 0) {
+				if (matrix[i][j] != INT_MAX && i!=j) {
 					counter++;
 				}
 			}
@@ -98,7 +98,7 @@ public:
 		int answer = 0;
 		for (auto& i : matrix) {
 			for (auto j : i) {
-				if (j != 0) {
+				if (j != INT_MAX) {
 					answer += j;
 				}
 			}
@@ -111,12 +111,17 @@ public:
 
 	bool is_weighted() const
 	{
-		return weighted;
+		return this->weighted;
 	}
 
 	bool is_directed() const
 	{
-		return directed;
+		if (this->directed) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	adjacencyStructure get_adjacencyStructure();
@@ -178,7 +183,7 @@ class adjacencyStructure {
 
 	bool weighted;
 	bool directed;
-	bool structure = 1;
+	bool structure;
 public:
 	bool what_structure() {
 		return structure;
@@ -187,6 +192,7 @@ public:
 	adjacencyStructure(bool weighted, bool directed) {
 		this->weighted = weighted;
 		this->directed = directed;
+		this->structure = 1;
 	}
 
 	adjacencyStructure(bool weighted, bool directed, size_t number_of_nodes, size_t number_of_edges);
@@ -240,12 +246,17 @@ public:
 
 	bool is_weighted() const
 	{
-		return weighted;
+		return this->weighted;
 	}
 
 	bool is_directed() const
 	{
-		return directed;
+		if (directed) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	adjacencyMatrix get_adjacencyMatrix() {
@@ -317,6 +328,20 @@ int what_distance_algorithm_menu();
 
 bool is_int(const std::string& str);
 
+template<typename T>
+void insertion_sort(std::vector<T>& Array, size_t begin, size_t end)
+{
+	for (size_t i = begin + 1; i < end + 1; i++) {
+		T key = Array[i];
+		size_t j = i;
+		while (j > begin && Array[j - 1].weight > key.weight) {
+			Array[j] = Array[j - 1];
+			j--;
+		}
+		Array[j] = key;
+	}
+}
+
 template <typename T>
 size_t partition_quicksort(std::vector<T>& Array, size_t begin, size_t end) {
 	begin++;
@@ -344,6 +369,10 @@ template <typename T>
 void quicksort(std::vector<T>& Array, size_t begin, size_t end)
 {
 	if (begin < end) {
+		if ((end - begin) < 30) {
+			insertion_sort(Array, begin, end);
+			return;
+		}
 		size_t p = partition_quicksort(Array, begin, end);
 		quicksort(Array, begin, p);
 		quicksort(Array, p + 1, end);
@@ -891,7 +920,7 @@ void actions(T graph) {
 					if (what_algorithm == 0) {
 						std::vector<int>distances = graph.dijkstra_algorithm(node1);
 						for (size_t i = 0; i < distances.size(); i++) {
-							if (distances[i] != INT_MAX/2) {
+							if (distances[i] != INT_MAX) {
 								std::cout << "Node " << i << ": " << distances[i] << std::endl;
 							}
 							else {
@@ -903,7 +932,7 @@ void actions(T graph) {
 						if (node1 < graph.get_number_of_nodes()) {
 							std::vector<std::vector<int>>distances = graph.floyd_algorithm();
 							for (size_t i = 0; i < distances.size(); i++) {
-								if (distances[node1][i] != INT_MAX / 2) {
+								if (distances[node1][i] != INT_MAX) {
 									std::cout << "Node " << i << ": " << distances[node1][i] << std::endl;
 								}
 								else {
@@ -918,7 +947,7 @@ void actions(T graph) {
 					else if (what_algorithm == 2) {
 						std::vector<int>distances = graph.bellman_ford_algorithm(node1);
 						for (size_t i = 0; i < distances.size(); i++) {
-							if (distances[i] != INT_MAX/2) {
+							if (distances[i] != INT_MAX) {
 								std::cout << "Node " << i << ": " << distances[i] << std::endl;
 							}
 							else {
@@ -958,7 +987,7 @@ void actions(T graph) {
 					for (size_t i = 0; i < distances.size(); i++) {
 						std::cout << "Node " << i << ": ";
 						for (size_t j = 0; j < distances.size(); j++) {
-							if (distances[i][j] != INT_MAX/2) {
+							if (distances[i][j] != INT_MAX) {
 								std::cout << '\t' << distances[i][j];
 							}
 							else {
@@ -1111,13 +1140,11 @@ void actions(T graph) {
 		else if (choise == 20) {
 			if (graph.what_structure() == 0) {
 				adjacencyStructure structure(graph);
-				actions(structure);
-				return;
+				return actions(structure);
 			}
 			else if (graph.what_structure() == 1) {
 				adjacencyMatrix matrix(graph);
-				actions(matrix);
-				return;
+				return actions(matrix);
 			}
 		}
 		system("pause");
@@ -1351,7 +1378,7 @@ void commands(T& graph) {
 					for (size_t i = 0; i < distances.size(); i++) {
 						std::cout << "Node " << i << ": ";
 						for (size_t j = 0; j < distances.size(); j++) {
-							if (distances[i][j] != INT_MAX / 2) {
+							if (distances[i][j] != INT_MAX) {
 								std::cout << '\t' << distances[i][j];
 							}
 							else {
@@ -1381,7 +1408,7 @@ void commands(T& graph) {
 					{
 						std::vector<int>distances = graph.dijkstra_algorithm(argument);
 						for (size_t i = 0; i < distances.size(); i++) {
-							if (distances[i] != INT_MAX / 2) {
+							if (distances[i] != INT_MAX) {
 								std::cout << "Node " << i << ": " << distances[i] << std::endl;
 							}
 							else {
@@ -1449,7 +1476,7 @@ void commands(T& graph) {
 					for (size_t i = 0; i < distances.size(); i++) {
 						std::cout << "Node " << i << ": ";
 						for (size_t j = 0; j < distances.size(); j++) {
-							if (distances[i][j] != INT_MAX / 2) {
+							if (distances[i][j] != INT_MAX) {
 								std::cout << '\t' << distances[i][j];
 							}
 							else {
@@ -1480,7 +1507,7 @@ void commands(T& graph) {
 						std::vector<std::vector<int>>distances = graph.floyd_algorithm();
 						if (argument < (int)distances.size()) {
 							for (size_t i = 0; i < distances[argument].size(); i++) {
-								if (distances[argument][i] != INT_MAX / 2) {
+								if (distances[argument][i] != INT_MAX) {
 									std::cout << "Node " << i << ": " << distances[argument][i] << std::endl;
 								}
 								else {
@@ -1555,7 +1582,7 @@ void commands(T& graph) {
 					for (size_t i = 0; i < distances.size(); i++) {
 						std::cout << "Node " << i << ": ";
 						for (size_t j = 0; j < distances.size(); j++) {
-							if (distances[i][j] != INT_MAX / 2) {
+							if (distances[i][j] != INT_MAX) {
 								std::cout << '\t' << distances[i][j];
 							}
 							else {
@@ -1585,7 +1612,7 @@ void commands(T& graph) {
 					{
 						std::vector<int>distances = graph.bellman_ford_algorithm(argument);
 						for (size_t i = 0; i < distances.size(); i++) {
-							if (distances[i] != INT_MAX / 2) {
+							if (distances[i] != INT_MAX) {
 								std::cout << "Node " << i << ": " << distances[i] << std::endl;
 							}
 							else {
@@ -1763,8 +1790,7 @@ void commands(T& graph) {
 			try
 			{
 				T reverse = graph.build_reverse();
-				commands(reverse);
-				return;
+				return commands(reverse);
 			}
 			catch (const std::exception& ex)
 			{
@@ -1774,13 +1800,11 @@ void commands(T& graph) {
 		else if (all_commands.size() == 1 && all_commands[0] == "another") {
 			if (graph.what_structure() == 0) {
 				adjacencyStructure structure(graph);
-				commands(structure);
-				return;
+				return commands(structure);
 			}
 			else if (graph.what_structure() == 1) {
 				adjacencyMatrix matrix(graph);
-				commands(matrix);
-				return;
+				return commands(matrix);;
 			}
 		}
 		else if (all_commands.size() == 1 && all_commands[0] == "end") {
