@@ -146,7 +146,6 @@ public:
 	void find_strong_components(std::vector<std::vector<size_t>>& for_components);
 
 	std::vector<int> dijkstra_algorithm(size_t node);
-	void dijkstra_help(size_t node, std::vector<int>&ways, std::vector<bool>& marks);
 
 	adjacencyMatrix build_reverse() const;
 
@@ -285,7 +284,6 @@ public:
 	adjacencyStructure build_reverse() const;
 
 	std::vector<int> dijkstra_algorithm(size_t node);
-	void dijkstra_help(size_t node, std::vector<int>& ways, std::vector<bool>& marks);
 
 	std::vector<std::vector<int>>floyd_algorithm();
 	std::vector<int>bellman_ford_algorithm(size_t node);
@@ -838,7 +836,12 @@ void actions(T graph) {
 						{
 							std::vector<int>distances = graph.dijkstra_algorithm(node1);
 							if (node1 < distances.size() && node2 < distances.size()) {
-								std::cout << distances[node2] << std::endl;
+								if(distances[node2]==INT_MAX){
+									std::cout << "Another componenet" << std::endl;
+								}
+								else {
+									std::cout << distances[node2] << std::endl;
+								}
 							}
 							else {
 								std::cout << "Incorrect first or second node" << std::endl;
@@ -852,7 +855,12 @@ void actions(T graph) {
 					else if (what_algorithm == 1) {
 						std::vector<std::vector<int>>distances = graph.floyd_algorithm();
 						if (node1 < distances.size() && node2 < distances.size()) {
-							std::cout << distances[node1][node2] << std::endl;
+							if (distances[node1][node2] == INT_MAX) {
+								std::cout << "Another component" << std::endl;
+							}
+							else {
+								std::cout << distances[node1][node2] << std::endl;
+							}
 						}
 						else {
 							std::cout << "Incorrect first or second node" << std::endl;
@@ -863,7 +871,12 @@ void actions(T graph) {
 						{
 							std::vector<int>distances = graph.bellman_ford_algorithm(node1);
 							if (node1 < distances.size() && node2 < distances.size()) {
-								std::cout << distances[node2] << std::endl;
+								if (distances[node2] == INT_MAX) {
+									std::cout << "Another component" << std::endl;
+								}
+								else {
+									std::cout << distances[node2] << std::endl;
+								}
 							}
 							else {
 								std::cout << "Incorrect first or second node" << std::endl;
@@ -1154,7 +1167,7 @@ void actions(T graph) {
 
 template <typename T>
 void commands(T& graph) {
-	std::cout << "\nHelp for reference" << std::endl;
+	std::cout << "\help for reference" << std::endl;
 	while (true) {
 		std::string input;
 		std::getline(std::cin, input);
@@ -1210,7 +1223,7 @@ void commands(T& graph) {
 				}
 			}
 			else {
-				std::cout << "Incorrect argument. Help for reference" << std::endl;
+				std::cout << "Incorrect argument. help for reference" << std::endl;
 			}
 		}
 		else  if (all_commands.size() == 2 && all_commands[0] == "add" && all_commands[1] == "node") {
@@ -1244,7 +1257,7 @@ void commands(T& graph) {
 				}
 			}
 			else {
-				std::cout << "Incorrect argument. Help for reference" << std::endl;
+				std::cout << "Incorrect argument. help for reference" << std::endl;
 			}
 		}
 		else if (all_commands.size() == 3 && all_commands[0] == "delete" && all_commands[1] == "node") {
@@ -1267,7 +1280,7 @@ void commands(T& graph) {
 				}
 			}
 			else {
-				std::cout << "Incorrect argument. Help for reference" << std::endl;
+				std::cout << "Incorrect argument. help for reference" << std::endl;
 			}
 		}
 		else if (all_commands.size() == 2 && all_commands[0] == "show" && all_commands[1] == "graph") {
@@ -1309,7 +1322,7 @@ void commands(T& graph) {
 				}
 			}
 			else {
-				std::cout << "Incorrect argument. Help for reference" << std::endl;
+				std::cout << "Incorrect argument. help for reference" << std::endl;
 			}
 		}
 		else if (all_commands.size() == 1 && all_commands[0] == "connectivity") {
@@ -1422,7 +1435,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 			else if (all_commands.size() == 3) {
@@ -1446,10 +1459,16 @@ void commands(T& graph) {
 					{
 						std::vector<int>distances = graph.dijkstra_algorithm(arguments[0]);
 						if (arguments[1] < (int)distances.size()) {
-							std::cout << distances[arguments[1]] << std::endl;
+							if (distances[arguments[1]] == INT_MAX) {
+								std::cout << "Another component" << std::endl;
+							}
+							else {
+								std::cout << distances[arguments[1]] << std::endl;
+							}
+
 						}
 						else {
-							std::cout << "Incorrect argument. Help for reference" << std::endl;
+							std::cout << "Incorrect argument. help for reference" << std::endl;
 						}
 					}
 					catch (const std::exception& ex)
@@ -1458,7 +1477,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 		}
@@ -1516,7 +1535,7 @@ void commands(T& graph) {
 							}
 						}
 						else {
-							std::cout << "Incorrect argument. Help for reference" << std::endl;
+							std::cout << "Incorrect argument. help for reference" << std::endl;
 						}
 					}
 					catch (const std::exception& ex)
@@ -1525,7 +1544,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 			else if (all_commands.size() == 3) {
@@ -1549,10 +1568,15 @@ void commands(T& graph) {
 					{
 						std::vector<std::vector<int>>distances = graph.floyd_algorithm();
 						if (arguments[1] < (int)distances.size() && arguments[0] < (int)distances.size()) {
-							std::cout << distances[arguments[0]][arguments[1]] << std::endl;
+							if (distances[arguments[0]][arguments[1]] == INT_MAX) {
+								std::cout << "Another component" << std::endl;
+							}
+							else {
+								std::cout << distances[arguments[0]][arguments[1]] << std::endl;
+							}
 						}
 						else {
-							std::cout << "Incorrect argument. Help for reference" << std::endl;
+							std::cout << "Incorrect argument. help for reference" << std::endl;
 						}
 					}
 					catch (const std::exception& ex)
@@ -1561,7 +1585,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 		}
@@ -1626,7 +1650,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 			else if (all_commands.size() == 4) {
@@ -1650,10 +1674,15 @@ void commands(T& graph) {
 					{
 						std::vector<int>distances = graph.bellman_ford_algorithm(arguments[0]);
 						if (arguments[1] < (int)distances.size()) {
-							std::cout << distances[arguments[1]] << std::endl;
+							if (distances[arguments[1]] == INT_MAX) {
+								std::cout << "Another component" << std::endl;
+							}
+							else {
+								std::cout << distances[arguments[1]] << std::endl;
+							}
 						}
 						else {
-							std::cout << "Incorrect argument.Help for reference" << std::endl;
+							std::cout << "Incorrect argument.help for reference" << std::endl;
 						}
 					}
 					catch (const std::exception& ex)
@@ -1662,7 +1691,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 		}
@@ -1696,7 +1725,7 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 			else if (all_commands.size() == 4 && all_commands[2] == "topological" && all_commands[3] == "sorting") {
@@ -1740,11 +1769,11 @@ void commands(T& graph) {
 					}
 				}
 				else {
-					std::cout << "Incorrect argument. Help for reference" << std::endl;
+					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
 			else {
-				std::cout << "Unclear command. Help for reference" << std::endl;
+				std::cout << "Unclear command. help for reference" << std::endl;
 			}
 		}
 		else if (all_commands.size() == 1 && all_commands[0] == "Kahn") {
@@ -1811,7 +1840,7 @@ void commands(T& graph) {
 			return;
 		}
 		else {
-			std::cout << "Unclear command. Help for reference" << std::endl;
+			std::cout << "Unclear command. help for reference" << std::endl;
 		}
 	}
 }

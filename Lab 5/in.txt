@@ -26,13 +26,7 @@ Bellman Ford
 Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
-depth first 1
-depth first topological sorting
 depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
 another
 show graph
 show structure
@@ -63,317 +57,7 @@ Bellman Ford
 Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
-depth first 1
-depth first topological sorting
 depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-end
-matrix 0 0
-add node
-add node
-add redge 0 1
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-add node
-add node
-add redge 5 7
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-end
-matrix 0 0
-add node
-add node
-add redge 0 1
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-add node
-add node
-add redge 5 7
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-end
-matrix 0 0
-add node
-add node
-add redge 0 1
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-add node
-add node
-add redge 5 7
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-end
-matrix 0 0
-add node
-add node
-add redge 0 1
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
-another
-show graph
-show structure
-add node
-add node
-add redge 5 7
-show graph
-show structure
-weight
-random 10 15
-show graph
-show structure
-delete node 5
-delete redge 7 8
-show graph
-show structure
-connectivity
-components
-acyclicity
-check tree
-Dijkstra
-Dijkstra 3
-Dijkstra 2 5
-Floyd
-Floyd 3
-Floyd 2 5
-Bellman Ford
-Bellman Ford 3
-Bellman Ford 2 5
-depth first 0
-depth first 1
-depth first topological sorting
-depth first spanning tree 0
-depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
 another
 show graph
 show structure
@@ -407,12 +91,8 @@ Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
 depth first 1
-depth first topological sorting
 depth first spanning tree 0
 depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
 another
 show graph
 show structure
@@ -446,10 +126,8 @@ Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
 depth first 1
-depth first topological sorting
 depth first spanning tree 0
 depth first spanning tree 1
-Kahn
 Kruskal
 reverse delete
 another
@@ -483,10 +161,8 @@ Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
 depth first 1
-depth first topological sorting
 depth first spanning tree 0
 depth first spanning tree 1
-Kahn
 Kruskal
 reverse delete
 another
@@ -522,12 +198,8 @@ Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
 depth first 1
-depth first topological sorting
 depth first spanning tree 0
 depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
 another
 show graph
 show structure
@@ -559,14 +231,46 @@ Bellman Ford 3
 Bellman Ford 2 5
 depth first 0
 depth first 1
-depth first topological sorting
 depth first spanning tree 0
 depth first spanning tree 1
-Kahn
-Kruskal
-reverse delete
 another
 show graph
 show structure
+end
+structure 0 1
+add node
+add node
+add node
+add node
+add node
+add redge 0 1
+add redge 0 2
+add redge 1 2
+add redge 1 3
+add redge 2 3
+add redge 2 4
+depth first topological sorting
+Kahn
+another
+depth first topological sorting
+Kahn
+end
+structure 1 1
+add node
+add node
+add node
+add node
+add node
+add redge 0 1 2
+add redge 0 2 4
+add redge 1 2 1
+add redge 1 3 8
+add redge 2 3 0
+add redge 2 4 2
+depth first topological sorting
+Kahn
+another
+depth first topological sorting
+Kahn
 end
 exit

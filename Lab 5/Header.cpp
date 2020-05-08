@@ -165,20 +165,15 @@ void adjacencyMatrix::add_redge(size_t first_node, size_t second_node, int weigh
 	if (first_node < matrix.size() && second_node < matrix.size()) {
 		if (first_node != second_node) {
 			if (this->weighted) {
-				//if (weight != 0) {
-					if (matrix[first_node][second_node] == INT_MAX) {
-						matrix[first_node][second_node] = weight;
-						if (!this->directed) {
-							matrix[second_node][first_node] = weight;
-						}
+				if (matrix[first_node][second_node] == INT_MAX) {
+					matrix[first_node][second_node] = weight;
+					if (!this->directed) {
+						matrix[second_node][first_node] = weight;
 					}
-					else {
-						throw GraphErr("Edge with those nodes already exists");
-					}
-				/*}
+				}
 				else {
-					throw GraphErr("Weight can't be 0");
-				}*/
+					throw GraphErr("Edge with those nodes already exists");
+				}
 			}
 			else {
 				throw GraphErr("This type of function only for weighted graphs");
@@ -478,16 +473,6 @@ void adjacencyMatrix::find_strong_components(std::vector<std::vector<size_t>>& f
 
 std::vector<int> adjacencyMatrix::dijkstra_algorithm(size_t node)
 {
-	/*if (node < matrix.size()) {
-		std::vector<bool>marks(matrix.size(), 0);
-		std::vector<int>ways(matrix.size(), INT_MAX);
-		ways[node] = 0;
-		dijkstra_help(node, ways, marks);
-		return ways;
-	}
-	else {
-		throw GraphErr("Incorrect node");
-	}*/
 	std::vector <int> answer(matrix.size(), INT_MAX);
 	answer[node] = 0;
 	std::vector <bool> checked(matrix.size(), 0);
@@ -514,30 +499,6 @@ std::vector<int> adjacencyMatrix::dijkstra_algorithm(size_t node)
 		}
 	}
 	return answer;
-}
-
-void adjacencyMatrix::dijkstra_help(size_t node, std::vector<int>&ways, std::vector<bool>& marks) {
-	std::vector<node_struct>sorted;
-	for (size_t i = 0; i < matrix.size(); i++) {
-		if (matrix[node][i] != INT_MAX && i!=node && marks[i]!=1) {
-			sorted.push_back({ matrix[node][i], i});
-		}
-	}
-	if (sorted.size() == 0) {
-		return;
-	}
-	quicksort(sorted, 0, sorted.size() - 1);
-	for (size_t i = 0; i < sorted.size(); i++) {
-		if (ways[node] + sorted[i].weight < ways[sorted[i].node]) {
-			ways[sorted[i].node] = ways[node] + sorted[i].weight;
-		}
-	}
-	marks[node] = 1;
-	for (size_t i = 0; i < sorted.size(); i++) {
-		if (marks[sorted[i].node] == 0) {
-			dijkstra_help(sorted[i].node, ways, marks);
-		}
-	}
 }
 
 std::vector<std::vector<int>> adjacencyMatrix::floyd_algorithm()
@@ -577,26 +538,6 @@ std::vector<std::vector<int>> adjacencyMatrix::floyd_algorithm()
 std::vector<int> adjacencyMatrix::bellman_ford_algorithm(size_t node)
 {
 	if (node < matrix.size()) {
-		/*std::vector<int>answer(matrix.size(), INT_MAX);
-		std::vector <std::vector<int>> ways(matrix.size(), std::vector<int>(matrix.size(), INT_MAX));
-		ways[0][node] = 0;
-		for (size_t k = 1; k < matrix.size(); k++) {
-			for (size_t i = 0; i < matrix.size(); i++)
-			{
-				ways[k][i] = ways[k - 1][i];
-				for (size_t j = 0; j < matrix.size(); j++) {
-					if (i!=j && matrix[i][j] != INT_MAX && ways[k - 1][j]!= INT_MAX) {
-						if (ways[k - 1][j] + matrix[j][i] < ways[k][i]) {
-							ways[k][i] = ways[k - 1][j] + matrix[j][i];
-						}
-					}
-				}
-			}
-		}
-		for (size_t i = 0; i < answer.size(); i++) {
-			answer[i] = ways[matrix.size() - 1][i];
-		}
-		return answer;*/
 		std::vector <int> answer(matrix.size(), INT_MAX);
 		answer[node] = 0;
 		for (size_t k = 1; k < matrix.size(); k++) {
@@ -1035,6 +976,7 @@ adjacencyStructure::adjacencyStructure(bool weighted, bool directed, size_t numb
 				{
 					size_t first = mersenne() % number_of_nodes;
 					size_t second = mersenne() % number_of_nodes;
+					delete_redge(first, second);
 				}
 				catch (const std::exception&)
 				{
@@ -1117,22 +1059,17 @@ void adjacencyStructure::add_redge(size_t first_node, size_t second_node, int we
 	if (first_node < nodes.size() && second_node < nodes.size()) {
 		if (first_node != second_node) {
 			if (this->weighted) {
-				//if (weight != 0) {
-					if (!(this->find(first_node, second_node))) {
-						nodes[first_node].push_back(second_node);
-						weights[first_node].push_back(weight);
-						if (!directed) {
-							nodes[second_node].push_back(first_node);
+				if (!(this->find(first_node, second_node))) {
+					nodes[first_node].push_back(second_node);
+					weights[first_node].push_back(weight);
+					if (!directed) {
+						nodes[second_node].push_back(first_node);
 							weights[second_node].push_back(weight);
-						}
 					}
-					else {
-						throw GraphErr("Edge with those nodes already exists");
-					}
-				/*}
+				}
 				else {
-					throw GraphErr("Weight can't be 0");
-				}*/
+					throw GraphErr("Edge with those nodes already exists");
+				}
 			}
 			else {
 				throw GraphErr("This type of function only for weighted graphs");
@@ -1439,16 +1376,6 @@ void adjacencyStructure::find_strong_components(std::vector<std::vector<size_t>>
 
 std::vector<int> adjacencyStructure::dijkstra_algorithm(size_t node)
 {
-	/*if (node < nodes.size()) {
-		std::vector<bool>marks(nodes.size(), 0);
-		std::vector<int>ways(nodes.size(), INT_MAX);
-		ways[node] = 0;
-		dijkstra_help(node, ways, marks);
-		return ways;
-	}
-	else {
-		throw GraphErr("Incorrect node");
-	}*/
 	std::vector <int> answer(nodes.size(), INT_MAX);
 	answer[node] = 0;
 	std::vector <bool> checked(nodes.size(), 0);
@@ -1475,44 +1402,15 @@ std::vector<int> adjacencyStructure::dijkstra_algorithm(size_t node)
 			}
 		}
 		min_distance = INT_MAX;
-		for (size_t i = 0; i < nodes[current].size(); i++) {
-			if (checked[nodes[current][i]] == false && answer[nodes[current][i]] < min_distance)
+		for (size_t i = 0; i < nodes.size(); i++) {
+			if (checked[i] == false && answer[i] < min_distance)
 			{
-				min_distance = answer[nodes[current][i]];
-				min_node = nodes[current][i];
+				min_distance = answer[i];
+				min_node = i;
 			}
 		}
 	}
 	return answer;
-}
-
-void adjacencyStructure::dijkstra_help(size_t node, std::vector<int>& ways, std::vector<bool>& marks) {
-	std::vector<node_struct>sorted;
-	for (size_t i = 0; i < nodes[node].size(); i++) {
-		if (marks[nodes[node][i]] == 0) {
-			if (weighted) {
-				sorted.push_back({ weights[node][i],nodes[node][i] });
-			}
-			else {
-				sorted.push_back({ 1,nodes[node][i] });
-			}
-		}
-	}
-	if (sorted.size() == 0) {
-		return;
-	}
-	if (weighted) {
-		quicksort(sorted, 0, sorted.size() - 1);
-	}
-	for (size_t i = 0; i < sorted.size(); i++) {
-		if (ways[node] + sorted[i].weight < ways[sorted[i].node]) {
-			ways[sorted[i].node] = ways[node] + sorted[i].weight;
-		}
-	}
-	marks[node] = 1;
-	for (size_t i = 0; i < sorted.size(); i++) {
-		dijkstra_help(sorted[i].node, ways, marks);
-	}
 }
 
 std::vector<std::vector<int>> adjacencyStructure::floyd_algorithm()
@@ -1708,7 +1606,6 @@ adjacencyStructure adjacencyStructure::depth_first_spanning_tree(bool important_
 							}
 						}
 					}
-					break;
 				}
 			}
 			else {
@@ -2161,11 +2058,10 @@ int what_distance_algorithm_menu()
 }
 
 void commands() {
-	std::cout << "Help for reference" << std::endl << std::endl;
+	std::cout << "help for reference" << std::endl << std::endl;
 	while (true) {
 		std::string input;
 		std::getline(std::cin, input);
-		std::cout << std::endl << std::endl << std::endl << input << std::endl << std::endl << std::endl << std::endl << std::endl;
 		std::stringstream ss;
 		ss.str(input);
 		std::string part;
@@ -2224,7 +2120,7 @@ void commands() {
 				}
 			}
 			else {
-				std::cout << "Incorrect argument. Help for reference" << std::endl;
+				std::cout << "Incorrect argument. help for reference" << std::endl;
 			}
 		}
 		else if ((all_commands.size() == 3 || all_commands.size() == 5) && all_commands[0] == "structure") {
@@ -2268,7 +2164,7 @@ void commands() {
 				}
 			}
 			else {
-				std::cout << "Incorrect argument. Help for reference" << std::endl;
+				std::cout << "Incorrect argument. help for reference" << std::endl;
 			}
 		}
 		else if (all_commands.size()==1 && all_commands[0] == "exit") {
@@ -2276,7 +2172,7 @@ void commands() {
 			return;
 		}
 		else {
-			std::cout << "Unclear command. Help for reference" << std::endl;
+			std::cout << "Unclear command. help for reference" << std::endl;
 		}
 	}
 }
@@ -2305,6 +2201,50 @@ void benchmark()
 	benchmark_piece_structure(0, 1, benchm);
 	benchmark_piece_structure(1, 0, benchm);
 	benchmark_piece_structure(1, 1, benchm);
+	benchm << "\tKahn\tdepth first topological sorting (matrix)\n";
+	for (int i = 10; i < 1001;i*=10) {
+		while (true) {
+			adjacencyMatrix matrix(0, 1, i, i / 6);
+			try
+			{
+				clock_t start = clock();
+				matrix.topological_sorting_depth_first();
+				clock_t finish = clock();
+				benchm <<i<<'\t'<< finish - start << '\t';
+				start = clock();
+				matrix.topological_sorting_kahn();
+				finish = clock();
+				benchm << finish - start << '\n';
+				break;
+			}
+			catch (const std::exception&)
+			{
+
+			}
+		}
+	}
+	benchm << "\tKahn\tdepth first topological sorting (structure)\n";
+	for (int i = 10; i < 1001; i *= 10) {
+		while (true) {
+			adjacencyStructure matrix(0, 1, i, i / 6);
+			try
+			{
+				clock_t start = clock();
+				matrix.topological_sorting_depth_first();
+				clock_t finish = clock();
+				benchm << i << '\t'<< finish - start << '\t';
+				start = clock();
+				matrix.topological_sorting_kahn();
+				finish = clock();
+				benchm << finish - start << '\n';
+				break;
+			}
+			catch (const std::exception&)
+			{
+
+			}
+		}
+	}
 	std::cout << "Check benchmark.txt" << std::endl;
 	benchm.close();
 }
@@ -2324,7 +2264,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 	else {
 		benchm << "Matrix, weighted, directed\n";
 	}
-	benchm << "Count:\tCreate random (max/2 redges)\tGet weight\tConnectivity\tComponents\tAcyclicity\tTree\tDijkstra\tFloyd\tBellman Ford\tdepth first order(0)\tdepth first order(1)\tdf topological sorting\tdf spanning tree(0)\tdf spanning tree(1)\tKahn sorting\tKruskal\treverse delete\treverse\tanother structure\tsize of\n";
+	benchm << "Count:\tCreate random (max/4 redges)\tGet weight\tConnectivity\tComponents\tAcyclicity\tTree\tDijkstra\tFloyd\tBellman Ford\tdepth first order(0)\tdepth first order(1)\tdf spanning tree(0)\tdf spanning tree(1)\tKruskal\treverse delete\treverse\tanother structure\tsize of\n";
 	clock_t start;
 	clock_t finish;
 	double Time = 0;
@@ -2335,16 +2275,16 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		start = clock();
 		adjacencyMatrix matrix(0,0);
 		if (!directed && !weighted) {
-			matrix=adjacencyMatrix(0, 0, count, count * (count - 1) / 2);
+			matrix=adjacencyMatrix(0, 0, count, count * (count - 1) / 4);
 		}
 		else if(directed && !weighted) {
-			matrix = adjacencyMatrix(0, 1, count, count * (count - 1) / 2);
+			matrix = adjacencyMatrix(0, 1, count, count * (count - 1) / 4);
 		}
 		else if (!directed && weighted) {
-			matrix = adjacencyMatrix(1, 0, count, count * (count - 1) / 2);
+			matrix = adjacencyMatrix(1, 0, count, count * (count - 1) / 4);
 		}
 		else {
-			matrix = adjacencyMatrix(1, 1, count, count * (count - 1) / 2);
+			matrix = adjacencyMatrix(1, 1, count, count * (count - 1) / 4);
 		}
 		finish = clock();
 		benchm << finish-start << "\t\t\t";
@@ -2383,12 +2323,12 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t";
+			benchm << "--\t\t";
 		}
 		start = clock();
 		matrix.is_acyclic();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2405,28 +2345,28 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 			start = clock();
 			std::vector<int>a=matrix.dijkstra_algorithm(node);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
 		try
 		{
 			start = clock();
 			std::vector<std::vector<int>>a=matrix.floyd_algorithm();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
@@ -2441,7 +2381,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2455,7 +2395,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2469,21 +2409,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a=matrix.topological_sorting_depth_first();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2497,7 +2423,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2511,77 +2437,63 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a = matrix.topological_sorting_kahn();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix a = matrix.minimum_spanning_tree_kruskal();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix a = matrix.minimum_spanning_reverse_delete();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix a = matrix.build_reverse();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure structure(matrix);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
 		size_t size = sizeof(int) * count * count;
 		benchm << size<<'\n';
@@ -2640,12 +2552,12 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t";
+			benchm << "--\t\t";
 		}
 		start = clock();
 		matrix.is_acyclic();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2662,28 +2574,28 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 			start = clock();
 			std::vector<int > a = matrix.dijkstra_algorithm(node);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
 		try
 		{
 			start = clock();
 			std::vector<std::vector<int>>a=matrix.floyd_algorithm();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
@@ -2698,7 +2610,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2712,7 +2624,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2726,21 +2638,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a=matrix.topological_sorting_depth_first();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2754,7 +2652,7 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2768,77 +2666,63 @@ void benchmark_piece_matrix(bool weighted,bool directed,std::ofstream& benchm)
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a=matrix.topological_sorting_kahn();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix a = matrix.minimum_spanning_tree_kruskal();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix a = matrix.minimum_spanning_reverse_delete();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix a = matrix.build_reverse();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure structure(matrix);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
 		size_t size = sizeof(int) * count * count;
 		benchm << size << '\n';
@@ -2860,7 +2744,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 	else {
 		benchm << "Structure, weighted, directed\n";
 	}
-	benchm << "Count:\tCreate random (max/2 redges)\tGet weight\tConnectivity\tComponents\tAcyclicity\tTree\tDijkstra\tFloyd\tBellman Ford\tdepth first order(0)\tdepth first order(1)\tdf topological sorting\tdf spanning tree(0)\tdf spanning tree(1)\tKahn sorting\tKruskal\treverse delete\treverse\tanother structure\tsize of\n";
+	benchm << "Count:\tCreate random (max/4 redges)\tGet weight\tConnectivity\tComponents\tAcyclicity\tTree\tDijkstra\tFloyd\tBellman Ford\tdepth first order(0)\tdepth first order(1)\tdf spanning tree(0)\tdf spanning tree(1)\tKruskal\treverse delete\treverse\tanother structure\tsize of\n";
 	clock_t start;
 	clock_t finish;
 	double Time = 0;
@@ -2871,16 +2755,16 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		start = clock();
 		adjacencyStructure structure(0, 0);
 		if (!directed && !weighted) {
-			structure = adjacencyStructure(0, 0, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(0, 0, count, count * (count - 1) / 4);
 		}
 		else if (directed && !weighted) {
-			structure = adjacencyStructure(0, 1, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(0, 1, count, count * (count - 1) / 4);
 		}
 		else if (!directed && weighted) {
-			structure = adjacencyStructure(1, 0, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(1, 0, count, count * (count - 1) / 4);
 		}
 		else {
-			structure = adjacencyStructure(1, 1, count, count * (count - 1) / 2);
+			structure = adjacencyStructure(1, 1, count, count * (count - 1) / 4);
 		}
 		finish = clock();
 		benchm << finish - start << "\t\t\t";
@@ -2919,12 +2803,12 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t";
+			benchm << "--\t\t";
 		}
 		start = clock();
 		structure.is_acyclic();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -2941,28 +2825,28 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			start = clock();
 			std::vector<int>a = structure.dijkstra_algorithm(node);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
 		try
 		{
 			start = clock();
 			std::vector<std::vector<int>>a = structure.floyd_algorithm();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
@@ -2977,7 +2861,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -2991,7 +2875,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3005,21 +2889,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a = structure.topological_sorting_depth_first();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3033,7 +2903,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3047,79 +2917,68 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a = structure.topological_sorting_kahn();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure a = structure.minimum_spanning_tree_kruskal();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure a = structure.minimum_spanning_reverse_delete();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure a = structure.build_reverse();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix matrix(structure);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
-		size_t size = sizeof(int) * count * count;
+		size_t size = sizeof(int) * structure.get_number_of_edges();
+		if (structure.is_weighted()) {
+			size *= 2;
+		}
 		benchm << size << '\n';
 	}
 	while (Time <= 10 && count < 501) {
@@ -3140,7 +2999,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			structure = adjacencyStructure(1, 1, count, count * (count - 1) / 2);
 		}
 		finish = clock();
-		benchm << finish - start << "\t\t\t\t\t";
+		benchm << finish - start << "\t\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -3176,12 +3035,12 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		start = clock();
 		structure.is_acyclic();
 		finish = clock();
-		benchm << finish - start << "\t\t\t";
+		benchm << finish - start << "\t\t";
 		if ((finish - start) / CLOCKS_PER_SEC > Time) {
 			Time = (finish - start) / CLOCKS_PER_SEC;
 		}
@@ -3198,28 +3057,28 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 			start = clock();
 			std::vector<int > a = structure.dijkstra_algorithm(node);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
 		try
 		{
 			start = clock();
 			std::vector<std::vector<int>>a = structure.floyd_algorithm();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
@@ -3234,7 +3093,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3248,7 +3107,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3262,21 +3121,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a = structure.topological_sorting_depth_first();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3290,7 +3135,7 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
@@ -3304,79 +3149,68 @@ void benchmark_piece_structure(bool weighted, bool directed,std::ofstream& bench
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
-		}
-		try
-		{
-			start = clock();
-			std::vector<size_t>a = structure.topological_sorting_kahn();
-			finish = clock();
-			benchm << finish - start << "\t\t\t";
-			if ((finish - start) / CLOCKS_PER_SEC > Time) {
-				Time = (finish - start) / CLOCKS_PER_SEC;
-			}
-		}
-		catch (const std::exception&)
-		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure a = structure.minimum_spanning_tree_kruskal();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure a = structure.minimum_spanning_reverse_delete();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyStructure a = structure.build_reverse();
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t";
 		}
 		try
 		{
 			start = clock();
 			adjacencyMatrix matrix(structure);
 			finish = clock();
-			benchm << finish - start << "\t\t\t";
+			benchm << finish - start << "\t\t";
 			if ((finish - start) / CLOCKS_PER_SEC > Time) {
 				Time = (finish - start) / CLOCKS_PER_SEC;
 			}
 		}
 		catch (const std::exception&)
 		{
-			benchm << "--\t\t\t\t";
+			benchm << "--\t\t";
 		}
-		size_t size = sizeof(int) * count * count;
+		size_t size = sizeof(int) * structure.get_number_of_edges();
+		if (structure.is_weighted()) {
+			size *= 2;
+		}
 		benchm << size << '\n';
 	}
 }
