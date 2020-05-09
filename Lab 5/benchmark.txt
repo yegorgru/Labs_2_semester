@@ -1,48 +1,48 @@
 Matrix, unweighted, undirected
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			0	1		0		0	0		2	0			0			--			1			--			--	--	--	0		400
-100		4			0			11	10		0		7	11		552	140			9			--			30			--			--	--	--	7		40000
-1000		262			10			667	620		1		521	1042		--	141781			748			--			1464			--			--	--	--	229		4000000
+10		0			0			0	0		0		0	0		0	0			0			--			0			--			--	--	--	0		400
+100		1			0			0	0		0		0	0		20	14			0			--			1			--			--	--	--	0		40000
+1000		18			0			6	6		0		6	9		--	10330			8			--			15			--			--	--	--	11		4000000
 Matrix, unweighted, directed
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			0	1		0		0	0		1	0			0			--			--			--			--	--	0	0		400
-100		2			0			26	22		0		24	10		447	115			5			--			29			--			--	--	5	2		40000
-1000		143			5			2302	2239		0		2216	1039		--	120873			448			--			2791			--			--	--	475	146		4000000
+10		0			0			0	0		0		0	0		0	0			0			--			--			--			--	--	0	0		400
+100		0			0			0	0		0		1	0		8	5			0			--			1			--			--	--	0	0		40000
+1000		19			0			51	29		0		25	7		--	7801			5			--			31			--			--	--	17	6		4000000
 Matrix, weighted, undirected
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			0	1		0		0	0		1	0			0			0			0			1			0	1	--	0		400
-100		4			0			7	6		0		6	10		491	136			8			13			14			23			11	8352	--	6		40000
-200		6			0			41	75		0		82	42		3762	1315			58			90			95			137			68	450499	--	34		160000
+10		0			0			0	0		0		0	0		0	0			0			0			0			0			0	0	--	0		400
+100		0			0			0	0		0		1	0		8	8			0			0			0			1			0	83	--	1		40000
+1000		15			0			6	5		0		6	9		--	10090			8			25			15			31			--	--	--	12		4000000
 Matrix, weighted, directed
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			1	0		0		1	0		1	0			0			0			--			--			--	--	0	0		400
-100		1			0			23	23		0		26	12		448	99			4			8			33			48			--	--	4	3		40000
-1000		135			5			2177	2251		0		2264	1061		--	120479			433			704			2735			3025			--	--	418	235		4000000
+10		0			0			0	0		0		0	0		0	0			0			0			0			0			--	--	0	0		400
+100		0			0			0	1		0		0	0		8	5			0			0			1			0			--	--	0	1		40000
+1000		11			0			24	23		0		20	7		--	7323			5			17			31			37			--	--	19	11		4000000
 Structure, unweighted, undirected
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			0	0		0		0	1		0	0			1			--			0			--			--	--	--	0		88
-100		12			0			5	4		0		5	9		470	139			6			--			19			--			--	--	--	1		9900
-1000		6649			0			481	446		1		426	978		--	142406			499			--			956			--			--	--	--	64		999000
+10		0			0			0	0		0		0	0		0	0			0			--			0			--			--	--	--	0		88
+100		0			0			0	1		0		0	0		12	12			0			--			0			--			--	--	--	0		9900
+1000		80			0			1	1		0		0	5		--	10244			1			--			2			--			--	--	--	2		999000
 Structure, unweighted, directed
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			0	1		0		0	0		1	0			0			--			--			--			--	--	0	0		88
-100		7			0			11	10		0		10	11		444	98			4			--			18			--			--	--	11	1		9900
-1000		3021			0			3225	3229		0		3534	948		--	120897			246			--			3511			--			--	--	2728	31		999000
+10		0			0			0	0		0		0	0		0	0			0			--			--			--			--	--	0	0		88
+100		1			0			0	0		0		0	0		8	5			0			--			1			--			--	--	0	0		9900
+1000		26			0			22	21		0		23	3		--	7299			1			--			24			--			--	--	22	2		999000
 Structure, weighted, undirected
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		1			0			0	0		0		0	0		1	0			0			0			0			1			0	2	--	0		176
-100		12			0			5	4		0		5	9		490	137			6			16			16			22			11	6223	--	2		19800
-200		268			0			33	40			0		34	43		3740	1308			58			95			91			136			65	366382	--	8		159200
+10		0			0			0	0		0		0	0		0	0			0			0			0			0			0	0	--	0		176
+100		0			0			0	0		0		0	0		8	8			0			0			0			0			1	15	--	0		19800
+1000		50			0			0	1		0		1	3		--	10063			2			18			3			19			--	--	--	3		1998000
 Structure, weighted, directed
 Count:	Create random (max/4 redges)	Get weight	Connectivity	Components	Acyclicity	Tree	Dijkstra	Floyd	Bellman Ford	depth first order(0)	depth first order(1)	df spanning tree(0)	df spanning tree(1)	Kruskal	reverse delete	reverse	another structure	size of
-10		0			0			1	1		0		0	0		1	0			0			1			--			--			--	--	0	0		176
-100		9			0			35	16		0		13	9		457	115			3			7			16			20			--	--	11	1		19800
-1000		3018			1			3344	3349		0		3829	973		--	120203			309			621			3595			3909			--	--	2845	40		1998000
+10		0			0			0	0		0		0	0		0	0			0			0			--			--			--	--	0	0		176
+100		1			0			0	0		0		1	0		10	7			0			0			0			1			--	--	0	0		19800
+1000		40			0			34	30		0		30	3		--	7421			1			6			31			36			--	--	28	2		1998000
 	Kahn	depth first topological sorting (matrix)
-10	0	1
-100	5	11
-1000	329	665
+10	0	0
+100	1	0
+1000	4	6
 	Kahn	depth first topological sorting (structure)
-10	1	0
-100	1	5
-1000	16	115
+10	0	0
+100	0	0
+1000	0	3
