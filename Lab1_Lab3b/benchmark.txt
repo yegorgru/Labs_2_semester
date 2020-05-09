@@ -1,4 +1,5 @@
 Count:	Search by string in end	Search by units and min expiration date	Search by dates	Save in txt:	Save in bin:	Read from txt	Read from bin	Size of txt	Size of bin	Sorting units with quicksort	Sorting units with counting sort	Sorting exp. date with quicksort	Sorting exp.date with radix sort	Sorting all fields with quicksort	Sorting all fields with not comparison sorts
-1000			5			4			0			46		44		32		154		42699		42699				32				8				20				25				61					50
-10000			38			39			7			436		432		353		327		437714		437714				417				79				269				252				860					656
-100000			376			397			66			4313		4374		3240		3211		4479301		4479301				5250				795				3580				2565				11309					8204
+1000			0			0			0			47		17		6		9		42816		42816				1				0				0				1				1					1
+10000			0			1			0			164		160		54		64		438002		438002				6				2				4				7				10					9
+100000			3			4			2			1644		1659		542		547		4478606		4478606				68				18				55				98				137					115
+1000000			29			43			20			16182		16330		5615		6535		45805415	45805415			890				196				809				1001				1748					1391
