@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
     is_action=false;
     delay=1000;
 
+    current_bot.alive=false;
+
     m_timer = new QTimer(this);
     connect (m_timer,&QTimer::timeout,this,&MainWindow::update_scene);
 
@@ -44,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
                 elements[i][j]=4;
             }
             items[i][j]->setScale(0.02);
-            //items[i][j]->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+            //items[i][j]->setFlags(QGraphicsItem::ItemIsSelectable);
             items[i][j]->setPos(18*i,18*j);
             scene->addItem(items[i][j]);
         }
@@ -119,6 +121,8 @@ MainWindow::MainWindow(QWidget *parent)
     //scene->addItem(item);
     //movie_poster->show();
     ui->play->setVisible(false);
+    ui->parameters->setVisible(false);
+    ui->Bot_show->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -208,246 +212,301 @@ void MainWindow::action(){
 }
 
 void MainWindow::update_scene(){
-    int number_of_new_trees=0;
-    if(tree_propagation_speed==1){
-        number_of_new_trees=20;
-    }
-    else if(tree_propagation_speed==2){
-        number_of_new_trees=100;
-    }
-    else if(tree_propagation_speed==3){
-        number_of_new_trees=500;
-    }
-    for(int i=0;i<number_of_new_trees;i++){
-        int posX=1+mersenne()%49;
-        int posY=1+mersenne()%49;
-        if(elements[posX][posY]==1){
-            elements[posX][posY]=3;
+    if(is_action){
+        int number_of_new_trees=0;
+        if(tree_propagation_speed==1){
+            number_of_new_trees=20;
         }
-        changed.push_back({posX,posY});
-    }
-    for(int i=0;i<(int)bots.size();i++){
-        if(bots[i].alive==true){
-            bots[i].energy--;
-            if(bots[i].energy<1){
-                bots[i].alive=false;
-                elements[bots[i].posX][bots[i].posY]=2;
-                changed.push_back({bots[i].posX,bots[i].posY});
-                bots.erase(bots.begin()+i);
-                if(i!=(int)(bots.size()-1)){
-                     i--;
+        else if(tree_propagation_speed==2){
+            number_of_new_trees=100;
+        }
+        else if(tree_propagation_speed==3){
+            number_of_new_trees=500;
+        }
+        for(int i=0;i<number_of_new_trees;i++){
+            int posX=1+mersenne()%49;
+            int posY=1+mersenne()%49;
+            if(elements[posX][posY]==1){
+                elements[posX][posY]=3;
+            }
+            changed.push_back({posX,posY});
+        }
+        for(size_t i=0;i<bots.size();i++){
+            bool is_cur=false;
+            if(current_bot==bots[i]){
+                is_cur = true;
+            }
+            if(bots[i].alive==true){
+                bots[i].age++;
+                bots[i].energy--;
+                if(bots[i].energy<1){
+                    bots[i].alive=false;
+                    elements[bots[i].posX][bots[i].posY]=2;
+                    changed.push_back({bots[i].posX,bots[i].posY});
+                    bots.erase(bots.begin()+i);
+                    if(i!=bots.size()-1){
+                         i--;
+                    }
+                }
+                else{
+                    bool go=false;
+                    bots[i].view=mersenne()%8;
+                    int what_is_ahead;
+                    coordinates ahead=get_ahead(what_is_ahead,bots[i]);
+                    if(bots.size()<2000 && bots[i].energy>bots[i].min_energy_for_division-1 && what_is_ahead==1){
+                        bots[i].energy/=2;
+                        //Bot new_bot(bots[i]);
+                        bots.push_back(bots[i]);
+                        if(bots.size()>2000){
+                            std::cout<<"Error"<<bots.size();
+                        }
+                        changed.push_back({bots[i].posX,bots[i].posY});
+                        go=true;
+                    }
+                    else{
+                        int action;
+                        int attack_fall;
+                        if(bots[i].irritation!=10){
+                            if(what_is_ahead/10==0){
+                                action=bots[i].gens_of_irritation[bots[i].irritation][what_is_ahead-1];
+                                attack_fall=bots[i].gens_of_irritation[bots[i].irritation][6];
+                            }
+                            else if(what_is_ahead/10==bots[i].color || what_is_ahead/10==6){
+                                if(bots[i].superpower==5){
+                                    for(size_t j=0;j<bots.size();j++){
+                                        if(bots[j].posX==ahead.x && bots[j].posY==ahead.y){
+                                            int energy=(bots[i].energy+bots[j].energy)/2;
+                                            bots[i].energy=energy;
+                                            bots[j].energy=energy;
+                                        }
+                                    }
+                                }
+                                action=bots[i].gens_of_irritation[bots[i].irritation][4];
+                                attack_fall=bots[i].gens_of_irritation[bots[i].irritation][6];
+                            }
+                            else{
+                                action=bots[i].gens_of_irritation[bots[i].irritation][5];
+                                attack_fall=bots[i].gens_of_irritation[bots[i].irritation][6];
+                            }
+                            bots[i].irritation=10;
+                        }
+                        else{
+                            if(what_is_ahead/10==0){
+                                action=bots[i].gens_of_action[bots[i].counter][what_is_ahead-1];
+                                attack_fall=bots[i].gens_of_action[bots[i].counter][6];
+                            }
+                            else if(what_is_ahead/10==bots[i].color || what_is_ahead/10==6){
+                                action=bots[i].gens_of_action[bots[i].counter][4];
+                                attack_fall=bots[i].gens_of_action[bots[i].counter][6];
+                                if(bots[i].superpower==5){
+                                    for(size_t j=0;j<bots.size();j++){
+                                        if(bots[j].posX==ahead.x && bots[j].posY==ahead.y){
+                                            int energy=(bots[i].energy+bots[j].energy)/2;
+                                            bots[i].energy=energy;
+                                            bots[j].energy=energy;
+                                        }
+                                    }
+                                }
+                            }
+                            else{
+                                action=bots[i].gens_of_action[bots[i].counter][5];
+                                attack_fall=bots[i].gens_of_action[bots[i].counter][6];
+                            }
+                            bots[i].counter=(bots[i].counter+1)%bots[i].number_of_gens_of_action;
+                        }
+                        if(action==9){
+                            if(what_is_ahead==1){
+                                action=0;
+                                go=true;
+                            }
+                            else if(what_is_ahead==2){
+                                bots[i].energy+=meat_energy;
+                                if(bots[i].superpower==3){
+                                    bots[i].energy+=meat_energy/5;
+                                }
+                                go=true;
+                            }
+                            else if(what_is_ahead==3){
+                                bots[i].energy+=plants_energy;
+                                if(bots[i].superpower==2){
+                                    bots[i].energy+=plants_energy/5;
+                                }
+                                go=true;
+                            }
+                            else if(what_is_ahead==4){
+                                continue;
+                            }
+                            else{
+                                for(size_t j=0;j<bots.size();j++){
+                                    if(bots[j].posX==ahead.x && bots[j].posY==ahead.y){
+                                        if(bots[i].superpower!=4){
+                                                if(bots[i].energy-bots[j].energy>bots[i].condition_for_attack-1){
+                                                    bots[j].energy-=bots[i].condition_for_attack;
+                                                    bots[i].energy+=bots[i].condition_for_attack;
+                                                    if(bots[j].posX<bots[i].posX){
+                                                        if(bots[j].posY<bots[i].posY){
+                                                            bots[j].irritation=3;
+                                                        }
+                                                        else if(bots[j].posY==bots[i].posY){
+                                                            bots[j].irritation=2;
+                                                        }
+                                                        else{
+                                                            bots[j].irritation=1;
+                                                        }
+                                                    }
+                                                    else if(bots[j].posX>bots[i].posX){
+                                                        if(bots[j].posY<bots[i].posY){
+                                                            bots[j].irritation=5;
+                                                        }
+                                                        else if(bots[j].posY==bots[i].posY){
+                                                            bots[j].irritation=6;
+                                                        }
+                                                        else{
+                                                            bots[j].irritation=7;
+                                                        }
+                                                    }
+                                                    else{
+                                                        if(bots[j].posY<bots[i].posY){
+                                                            bots[j].irritation=4;
+                                                        }
+                                                        else{
+                                                            bots[j].irritation=0;
+                                                        }
+                                                    }
+
+                                                    if(bots[j].energy<1 && bots[j].superpower==1 && bots[i].color!=bots[j].color){
+                                                        bots[i].energy=0;
+                                                    }
+
+                                                }
+                                                else{
+                                                    action=attack_fall;
+                                                }
+
+                                        }
+                                        else{
+                                            bots[i].energy-=(bots[i].condition_for_attack/5);
+                                            bots[j].energy=0;
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            if(bots[i].energy>bots[i].max_energy){
+                                bots[i].energy=bots[i].max_energy;
+                            }
+                        }
+                        if(action==8){
+                            continue;
+                        }
+                        if(action>-1 && action<8) {
+                            bots[i].view=(bots[i].view+action)%8;
+                            ahead=get_ahead(what_is_ahead,bots[i]);
+                            if(what_is_ahead==1){
+                                 go=true;
+                            }
+                        }
+                        if(!(action>-1&&action<10)){
+                            std::cout<<"Error";
+                        }
+                    }
+                    if(go){
+                        int buff=elements[bots[i].posX][bots[i].posY];
+                        elements[bots[i].posX][bots[i].posY]=1;
+                        changed.push_back({bots[i].posX,bots[i].posY});
+                        if(bots[i].view==0){
+                            bots[i].posY--;
+                        }
+                        else if(bots[i].view==1){
+                            bots[i].posX++;
+                            bots[i].posY--;
+                        }
+                        else if(bots[i].view==2){
+                            bots[i].posX++;
+                        }
+                        else if(bots[i].view==3){
+                            bots[i].posX++;
+                            bots[i].posY++;
+                        }
+                        else if(bots[i].view==4){
+                            bots[i].posY++;
+                        }
+                        else if(bots[i].view==5){
+                            bots[i].posX--;
+                            bots[i].posY++;
+                        }
+                        else if(bots[i].view==6){
+                            bots[i].posX--;
+                        }
+                        else {
+                            bots[i].posX--;
+                            bots[i].posY--;
+                        }
+                        elements[bots[i].posX][bots[i].posY]=buff;
+                    }
+                    changed.push_back({bots[i].posX,bots[i].posY});
+                    elements[bots[i].posX][bots[i].posY]=bots[i].color*10+bots[i].view;
                 }
             }
             else{
-                bool go=false;
-                bots[i].view=mersenne()%8;
-                int what_is_ahead;
-                coordinates ahead=get_ahead(what_is_ahead,bots[i]);
-                if(bots.size()<2000 && bots[i].energy>bots[i].min_energy_for_division-1 && what_is_ahead==1){
-                    bots[i].energy/=2;
-                    //Bot new_bot(bots[i]);
-                    bots.push_back(bots[i]);
-                    if(bots.size()>2000){
-                        std::cout<<"Error"<<bots.size();
-                    }
-                    changed.push_back({bots[i].posX,bots[i].posY});
-                    go=true;
-                }
-                else{
-                    int action;
-                    int attack_fall;
-                    if(bots[i].irritation!=10){
-                        if(what_is_ahead/10==0){
-                            action=bots[i].gens_of_irritation[bots[i].irritation][what_is_ahead-1];
-                            attack_fall=bots[i].gens_of_irritation[bots[i].irritation][6];
-                        }
-                        else if(what_is_ahead/10==bots[i].color || what_is_ahead/10==6){
-                            if(bots[i].superpower==5){
-                                for(size_t j=0;j<bots.size();j++){
-                                    if(bots[j].posX==ahead.x && bots[j].posY==ahead.y){
-                                        int energy=(bots[i].energy+bots[j].energy)/2;
-                                        bots[i].energy=energy;
-                                        bots[j].energy=energy;
-                                    }
-                                }
-                            }
-                            action=bots[i].gens_of_irritation[bots[i].irritation][4];
-                            attack_fall=bots[i].gens_of_irritation[bots[i].irritation][6];
-                        }
-                        else{
-                            action=bots[i].gens_of_irritation[bots[i].irritation][5];
-                            attack_fall=bots[i].gens_of_irritation[bots[i].irritation][6];
-                        }
-                        bots[i].irritation=10;
-                    }
-                    else{
-                        if(what_is_ahead/10==0){
-                            action=bots[i].gens_of_action[bots[i].counter][what_is_ahead-1];
-                            attack_fall=bots[i].gens_of_action[bots[i].counter][6];
-                        }
-                        else if(what_is_ahead/10==bots[i].color || what_is_ahead/10==6){
-                            action=bots[i].gens_of_action[bots[i].counter][4];
-                            attack_fall=bots[i].gens_of_action[bots[i].counter][6];
-                            if(bots[i].superpower==5){
-                                for(size_t j=0;j<bots.size();j++){
-                                    if(bots[j].posX==ahead.x && bots[j].posY==ahead.y){
-                                        int energy=(bots[i].energy+bots[j].energy)/2;
-                                        bots[i].energy=energy;
-                                        bots[j].energy=energy;
-                                    }
-                                }
-                            }
-                        }
-                        else{
-                            action=bots[i].gens_of_action[bots[i].counter][5];
-                            attack_fall=bots[i].gens_of_action[bots[i].counter][6];
-                        }
-                        bots[i].counter=(bots[i].counter+1)%bots[i].number_of_gens_of_action;
-                    }
-                    if(action==9){
-                        if(what_is_ahead==1){
-                            action=0;
-                            go=true;
-                        }
-                        else if(what_is_ahead==2){
-                            bots[i].energy+=meat_energy;
-                            if(bots[i].superpower==3){
-                                bots[i].energy+=meat_energy/5;
-                            }
-                            go=true;
-                        }
-                        else if(what_is_ahead==3){
-                            bots[i].energy+=plants_energy;
-                            if(bots[i].superpower==2){
-                                bots[i].energy+=plants_energy/5;
-                            }
-                            go=true;
-                        }
-                        else if(what_is_ahead==4){
-                            continue;
-                        }
-                        else{
-                            for(size_t j=0;j<bots.size();j++){
-                                if(bots[j].posX==ahead.x && bots[j].posY==ahead.y){
-                                    if(bots[i].superpower!=4){
-                                            if(bots[i].energy-bots[j].energy>bots[i].condition_for_attack-1){
-                                                bots[j].energy-=bots[i].condition_for_attack;
-                                                bots[i].energy+=bots[i].condition_for_attack;
-                                                if(bots[j].posX<bots[i].posX){
-                                                    if(bots[j].posY<bots[i].posY){
-                                                        bots[j].irritation=3;
-                                                    }
-                                                    else if(bots[j].posY==bots[i].posY){
-                                                        bots[j].irritation=2;
-                                                    }
-                                                    else{
-                                                        bots[j].irritation=1;
-                                                    }
-                                                }
-                                                else if(bots[j].posX>bots[i].posX){
-                                                    if(bots[j].posY<bots[i].posY){
-                                                        bots[j].irritation=5;
-                                                    }
-                                                    else if(bots[j].posY==bots[i].posY){
-                                                        bots[j].irritation=6;
-                                                    }
-                                                    else{
-                                                        bots[j].irritation=7;
-                                                    }
-                                                }
-                                                else{
-                                                    if(bots[j].posY<bots[i].posY){
-                                                        bots[j].irritation=4;
-                                                    }
-                                                    else{
-                                                        bots[j].irritation=0;
-                                                    }
-                                                }
-
-                                                if(bots[j].energy<1 && bots[j].superpower==1 && bots[i].color!=bots[j].color){
-                                                    bots[i].energy=0;
-                                                }
-
-                                            }
-                                            else{
-                                                action=attack_fall;
-                                            }
-
-                                    }
-                                    else{
-                                        bots[i].energy-=(bots[i].condition_for_attack/5);
-                                        bots[j].energy=0;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        if(bots[i].energy>bots[i].max_energy){
-                            bots[i].energy=bots[i].max_energy;
-                        }
-                    }
-                    if(action==8){
-                        continue;
-                    }
-                    if(action>-1 && action<8) {
-                        bots[i].view=(bots[i].view+action)%8;
-                        ahead=get_ahead(what_is_ahead,bots[i]);
-                        if(what_is_ahead==1){
-                             go=true;
-                        }
-                    }
-                    if(!(action>-1&&action<10)){
-                        std::cout<<"Error";
-                    }
-                }
-                if(go){
-                    int buff=elements[bots[i].posX][bots[i].posY];
-                    elements[bots[i].posX][bots[i].posY]=1;
-                    changed.push_back({bots[i].posX,bots[i].posY});
-                    if(bots[i].view==0){
-                        bots[i].posY--;
-                    }
-                    else if(bots[i].view==1){
-                        bots[i].posX++;
-                        bots[i].posY--;
-                    }
-                    else if(bots[i].view==2){
-                        bots[i].posX++;
-                    }
-                    else if(bots[i].view==3){
-                        bots[i].posX++;
-                        bots[i].posY++;
-                    }
-                    else if(bots[i].view==4){
-                        bots[i].posY++;
-                    }
-                    else if(bots[i].view==5){
-                        bots[i].posX--;
-                        bots[i].posY++;
-                    }
-                    else if(bots[i].view==6){
-                        bots[i].posX--;
-                    }
-                    else {
-                        bots[i].posX--;
-                        bots[i].posY--;
-                    }
-                    elements[bots[i].posX][bots[i].posY]=buff;
-                }
-                changed.push_back({bots[i].posX,bots[i].posY});
-                elements[bots[i].posX][bots[i].posY]=bots[i].color*10+bots[i].view;
+               std::cout<<"Error";
+            }
+            if(is_cur){
+                current_bot=bots[i];
             }
         }
-        else{
-           std::cout<<"Error";
-        }
+        form_scene();
+        scene->update();
+        ui->graphicsView->update();
     }
-    form_scene();
-    scene->update();
-    ui->graphicsView->update();
 }
 
 void MainWindow::form_scene(){
+    if(scene->selectedItems().size()>0){
+        int x = scene->selectedItems().last()->x()/18;
+        int y = scene->selectedItems().last()->y()/18;
+        if(ui->color_value->text()==""||scene->selectedItems().size()>1){
+            for(auto i:bots){
+                if(i.posX==x && i.posY==y){
+                    current_bot=i;
+                    break;
+                }
+            }
+        }
+        for(auto& i:scene->selectedItems()){
+            i->setSelected(false);
+        }
+        scene->selectedItems().clear();
+    }
+    if(current_bot.alive==true){
+        if(current_bot.color==1){
+            ui->color_value->setText("Red");
+        }
+        else if(current_bot.color==2){
+            ui->color_value->setText("Yellow");
+        }
+        else if(current_bot.color==3){
+            ui->color_value->setText("Violet");
+        }
+        else if(current_bot.color==4){
+            ui->color_value->setText("Orange");
+        }
+        else if(current_bot.color==5){
+            ui->color_value->setText("Blue");
+        }
+        else{
+            ui->color_value->setText("Green");
+        }
+        ui->energy_value->setText(QString::number(current_bot.energy));
+        ui->view_value->setText(QString::number(current_bot.view));
+        ui->age_value->setText(QString::number(current_bot.age));
+    }
+    else{
+         ui->color_value->setText("");
+         ui->energy_value->setText("");
+         ui->view_value->setText("");
+         ui->age_value->setText("");
+    }
     if(changed.size()>0){
         int i;
         int j;

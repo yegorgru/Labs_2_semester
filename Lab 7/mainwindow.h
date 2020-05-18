@@ -77,6 +77,7 @@ private:
     QTimer* m_timer;
 
     std::deque<Bot>bots;
+    Bot current_bot=Bot(0,0,0,0);
 
     int number_of_live_cells;
     int initial_live_cell_energy;

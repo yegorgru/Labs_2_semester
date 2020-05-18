@@ -3,39 +3,6 @@
 extern std::mt19937 mersenne;
 
 
-/*Bot::Bot()
-{
-    energy = 20;
-    max_energy=100;
-    max_damage=10;
-    counter = 0;
-    posX = -1;
-    posY = -1;
-    number_of_gens_of_action=4;
-    min_energy_for_division=50;
-    max_age=5000;
-    view = mersenne()%8;
-    alive = true;
-    color=1+mersenne()%6;
-    for(int i=0;i<8;i++){
-        for(int j=0;j<6;j++){
-            gens_of_irritation[i][j]=mersenne() % 9;
-        }
-    }
-    for(int i=0;i<8;i++){
-        gens_of_irritation[i][6]=mersenne() % 8;
-    }
-    for(int i=0;i<number_of_gens_of_action;i++){
-        int* to_add=new int[7];
-        gens_of_action.push_back(to_add);
-        for (int j = 0; j < 6; j++) {
-            gens_of_action[i][j] = mersenne() % 9;
-        }
-    }
-    for(int i=0;i<number_of_gens_of_action;i++){
-        gens_of_irritation[i][6]=mersenne() % 8;
-    }
-}*/
 
 
 Bot::Bot(int energy,int max_energy,int number_of_gens_of_action,int min_energy_for_division){
@@ -48,11 +15,12 @@ Bot::Bot(int energy,int max_energy,int number_of_gens_of_action,int min_energy_f
     counter = 0;
     view = mersenne()%8;
     alive = true;
-    condition_for_attack=mersenne()%(max_energy/2);
+    condition_for_attack=mersenne()%(max_energy/2+1);
     chance_of_mutation=10;
     irritation=10;
     color=1+mersenne()%6;
     superpower=color;
+    this->age=0;
 
     for(int i=0;i<8;i++){
         for(int j=0;j<6;j++){
@@ -82,8 +50,10 @@ Bot::Bot(const Bot& another){
     }
     this->gens_of_action=another.gens_of_action;
 
-    //changeless
+    this->age=0;
     this->energy=another.energy;
+
+    //changeless
     this->max_energy=another.max_energy;
     this->counter=0;
     this->posX=another.posX;
@@ -177,7 +147,14 @@ Bot::Bot(const Bot& another){
 
 }
 
-
+bool operator== (const Bot &first, const Bot &second){
+    if(first.posX==second.posX && first.posY==second.posY){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
 
 

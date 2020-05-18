@@ -21,6 +21,7 @@ struct Bot
     bool alive;
     int chance_of_mutation;
     int irritation;
+    int age;
 
     int superpower;
 
@@ -28,7 +29,7 @@ struct Bot
     Bot(int energy,int max_energy,int number_of_gens_of_action,int min_energy_for_division);
     Bot(const Bot& another);
 
-    //~Bot();
+    friend bool operator== (const Bot &first, const Bot &second);
 };
 
 
