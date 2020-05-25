@@ -1,6 +1,8 @@
 #include "Header.h"
 
-std::string main_help = "\n\ndemomode - launch demomode\nbenchmark - launch benchmark\nlinked - create ordered list as linked list\narray - create ordered list as array\nbinary - create ordered list as binary tree\nAVL - create ordered list as AVL tree\n2-3 - create ordered list as 2-3 tree\nexit - close program\n\n";
+std::string main_help = "\n\ndemomode - launch demomode\nbenchmark - launch benchmark\nlinked - create ordered list as linked list\narray number - create ordered list as array with max number of points = number\nbinary - create ordered list as binary tree\nAVL - create ordered list as AVL tree\n2-3 - create ordered list as 2-3 tree\nexit - close program\n\n";
+std::string help_answer = "\n\npop back - erase last element\n\t\t(only for linked and array)\npop front - erase first element\n\t\t(only for linked and array)\npush x y z - push point with coordinates (x,y,z)\npush x y z number - push mumber points with coordinates (x,y,z)\n\t\t(isn't available for 2-3 and AVL)\npush random number - push number of random points\nquick push x y z - push point with coordinates (x,y,z)\n\t\t(only for array)\nquick push x y z number - push mumber points with coordinates (x,y,z)\n\t\t(only for array)\nerase x y z - erase point with coordinates (x, y, z)\nerase pos - erase point with position pos\n\t\t(unavailable for 2-3 tree)\nerase begin end - erase points with positions from begin to end\n\t\t(isn't available for 2-3 tree)\nshow - see ordered list\nshow pos - see point with position pos\n\t\t(isn't available for 2-3 tree)\nis value x y z - check if there is point with coordinates (x, y, z) in list\nvalue search x y z - see node abstraction (position) if point with this coordinates is in list\n\t\t(isn't available for 2-3 tree)\nrange search values x1 y1 z1 x2 y2 z2 - check what point from range A(x1, y1, z1) - B(x2, y2, z2) are in list\nrange search nodes x1 y1 z1 x2 y2 z2 - find out node abstractions (values and positions) of points from range A(x1, y1, z1) - B(x2, y2, z2) that are in list\n\t\t(isn't available for 2-3 and AVL trees)\naction x plus - increase x by 1 for all points\naction x minus - decrease x by 1 for all points\naction y plus - increase y by 1 for all points\naction y minus - decrease y by 1 for all points\naction z plus - increase z by 1 for all points\naction z minus - decrease z by 1 for all points\n";
+
 
 bool operator>(const point& left, const point& right)
 {
@@ -36,7 +38,7 @@ std::ostream& operator<<(std::ostream& out, const point& point)
 void orderedListLinkedList::pop_back()
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	else if (size == 1) {
 		delete tail;
@@ -55,7 +57,7 @@ void orderedListLinkedList::pop_back()
 void orderedListLinkedList::pop_front()
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	else if (size == 1) {
 		delete tail;
@@ -126,7 +128,7 @@ void orderedListLinkedList::push(point value)
 void orderedListLinkedList::push(point value, long long number)
 {
 	if (number < 1) {
-
+		throw ListErr("Incorrect number");
 	}
 	else if (number == 1) {
 		push(value);
@@ -200,7 +202,7 @@ void orderedListLinkedList::push_random(long long number)
 		new_values.push_back(point(number));
 	}
 	quicksort(new_values, 0, number - 1);
-	int counter = 0;
+	long long counter = 0;
 	push(new_values[0]);
 	if (number != 1) {
 		push(new_values[new_values.size() - 1]);
@@ -230,7 +232,7 @@ void orderedListLinkedList::push_random(long long number)
 void orderedListLinkedList::erase(point value)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	else {
 		while (head->value == value) {
@@ -261,10 +263,10 @@ void orderedListLinkedList::erase(point value)
 void orderedListLinkedList::erase(size_t pos)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	else if (pos > size - 1) {
-
+		throw ListErr("Incorrect pos");
 	}
 	else {
 		if (pos == size - 1) {
@@ -279,7 +281,9 @@ void orderedListLinkedList::erase(size_t pos)
 				search = search->next;
 			}
 			ListNode* to_erase = search->prev;
-			to_erase->prev->next = search;
+			if (to_erase->prev) {
+				to_erase->prev->next = search;
+			}
 			search->prev = to_erase->prev;
 			delete to_erase;
 			size--;
@@ -290,10 +294,10 @@ void orderedListLinkedList::erase(size_t pos)
 void orderedListLinkedList::erase(size_t begin, size_t end)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	if (begin > end || end > size - 1) {
-
+		throw ListErr("Incorrrect begin or end");
 	}
 	else if (begin == end) {
 		erase(begin);
@@ -310,7 +314,7 @@ void orderedListLinkedList::erase(size_t begin, size_t end)
 void orderedListLinkedList::show()
 {
 	if (size == 0) {
-		std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 	else {
 		ListNode* to_show = head;
@@ -324,10 +328,10 @@ void orderedListLinkedList::show()
 void orderedListLinkedList::show(size_t pos)
 {
 	if (size == 0) {
-		std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 	else if (pos > size - 1) {
-		//
+		throw ListErr("Incorrect pos");
 	}
 	else {
 		ListNode* search = head;
@@ -341,10 +345,10 @@ void orderedListLinkedList::show(size_t pos)
 point orderedListLinkedList::operator[](size_t index)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	if (index > size - 1) {
-		//std::cout << "Error. Out of range" << std::endl;
+		throw ListErr("Incorrect index");
 	}
 	else {
 		ListNode* search = head;
@@ -403,7 +407,7 @@ std::vector<point> orderedListLinkedList::range_search_values(point down, point 
 		return to_return;
 	}
 	else {
-		//
+		throw ListErr("Empty list or incorrect down and top");
 	}
 }
 
@@ -423,7 +427,7 @@ std::vector<node_abstraction> orderedListLinkedList::range_search_nodes(point do
 		return to_return;
 	}
 	else {
-		//
+		throw ListErr("Empty list or incorrect down and top");
 	}
 }
 
@@ -436,7 +440,6 @@ void orderedListLinkedList::action(void(*fooPointer)(point& a))
 	}
 }
 
-
 void orderedListArrayList::pop_back()
 {
 	if (size > 0) {
@@ -444,7 +447,7 @@ void orderedListArrayList::pop_back()
 		list[size];
 	}
 	else {
-		//std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 }
 
@@ -457,17 +460,14 @@ void orderedListArrayList::pop_front()
 		size--;
 	}
 	else {
-		//std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 }
 
 void orderedListArrayList::push(point value)
 {
-	if (size == 0) {
-		//std::cout << "You can't insert in empty list" << std::endl;
-	}
-	else if (size == max_size) {
-		//std::cout << "Error. This list is full" << std::endl;
+	if (size == max_size) {
+		throw ListErr("List is full");
 	}
 	else {
 		if (value > list[size - 1]) {
@@ -497,11 +497,8 @@ void orderedListArrayList::push(point value)
 
 void orderedListArrayList::quick_push(point value)
 {
-	if (size == 0) {
-		//std::cout << "You can't insert in empty list" << std::endl;
-	}
-	else if (size == max_size) {
-		//std::cout << "Error. This list is full" << std::endl;
+	if (size == max_size) {
+		throw ListErr("List is full");
 	}
 	else {
 		if (value > list[size - 1]) {
@@ -541,13 +538,10 @@ void orderedListArrayList::quick_push(point value)
 	}
 }
 
-void orderedListArrayList::push(point value, int number)
+void orderedListArrayList::push(point value, long long number)
 {
-	if (size == 0) {
-		//std::cout << "You can't insert in empty list" << std::endl;
-	}
-	else if (size + number > max_size) {
-		//std::cout << "Error. This list is full" << std::endl;
+	if (size + number > max_size) {
+		throw ListErr("List is full or too big number");
 	}
 	else {
 		if (value > list[size - 1]) {
@@ -581,13 +575,10 @@ void orderedListArrayList::push(point value, int number)
 	}
 }
 
-void orderedListArrayList::quick_push(point value, int number)
+void orderedListArrayList::quick_push(point value, long long number)
 {
-	if (size == 0) {
-		//std::cout << "You can't insert in empty list" << std::endl;
-	}
-	else if (size + number > max_size) {
-		//std::cout << "Error. This list is full" << std::endl;
+	if (size + number > max_size) {
+		throw ListErr("List is full or too big number");
 	}
 	else {
 		if (value > list[size - 1]) {
@@ -635,24 +626,29 @@ void orderedListArrayList::quick_push(point value, int number)
 
 void orderedListArrayList::push_random(long long number)
 {
-	std::vector<point>new_values;
-	for (long long i = 0; i < number; i++) {
-		new_values.push_back(point(number));
+	if (size + number > max_size) {
+		throw ListErr("List is full or too big number");
 	}
-	quicksort(new_values, 0, number - 1);
-	int counter = number - 1;
-	size_t position = size - 1;
-	while (counter >= 0) {
-		if (list[position] < new_values[counter]) {
-			list[position + counter + 1] = new_values[counter];
-			counter--;
+	else {
+		std::vector<point>new_values;
+		for (long long i = 0; i < number; i++) {
+			new_values.push_back(point(number));
 		}
-		else {
-			list[position + counter + 1] = list[position];
-			position--;
+		quicksort(new_values, 0, number - 1);
+		long long counter = number - 1;
+		size_t position = size - 1;
+		while (counter >= 0) {
+			if (list[position] < new_values[counter]) {
+				list[position + counter + 1] = new_values[counter];
+				counter--;
+			}
+			else {
+				list[position + counter + 1] = list[position];
+				position--;
+			}
 		}
+		size += number;
 	}
-	size += number;
 }
 
 void orderedListArrayList::erase(point value)
@@ -678,10 +674,10 @@ void orderedListArrayList::erase(point value)
 void orderedListArrayList::erase(size_t pos)
 {
 	if (size == 0) {
-		//std::cout << "ERROR. This list is empty.\n";
+		throw ListErr("Empty list");
 	}
 	else if (pos > size - 1) {
-		//std::cout << "Incorrect position\n";
+		throw ListErr("Incorrect pos");
 	}
 	else {
 		for (size_t i = pos; i < size - 1; i++) {
@@ -694,10 +690,10 @@ void orderedListArrayList::erase(size_t pos)
 void orderedListArrayList::erase(size_t begin, size_t end)
 {
 	if (size == 0) {
-		//std::cout << "ERROR. This list is empty.\n";
+		throw ListErr("Empty list");
 	}
 	else if (end < begin || end > size - 1) {
-		//std::cout << "Incorrect position\n";
+		throw ListErr("Incorrect begin or end");
 	}
 	else {
 		for (size_t i = begin; i < size - end + begin - 1; i++) {
@@ -709,7 +705,6 @@ void orderedListArrayList::erase(size_t begin, size_t end)
 
 void orderedListArrayList::show()
 {
-	system("cls");
 	if (size == 0) {
 		std::cout << "This list is empty" << std::endl;
 	}
@@ -722,12 +717,11 @@ void orderedListArrayList::show()
 
 void orderedListArrayList::show(size_t pos)
 {
-	system("cls");
 	if (size == 0) {
-		//std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 	else if (pos > size - 1) {
-		//std::cout << "Incorrect position" << std::endl;
+		throw ListErr("Incorrect pos");
 	}
 	else {
 		std::cout << list[pos];
@@ -737,10 +731,10 @@ void orderedListArrayList::show(size_t pos)
 point orderedListArrayList::operator[](size_t index)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	if (index > size - 1) {
-		//std::cout << "Error. Out of range" << std::endl;
+		throw ListErr("Incorrect index");
 	}
 	else {
 		return list[index];
@@ -788,6 +782,9 @@ std::vector<point> orderedListArrayList::range_search_values(point down, point t
 		}
 		return to_return;
 	}
+	else {
+		throw ListErr("Incorrect top and down");
+	}
 }
 
 std::vector<node_abstraction> orderedListArrayList::range_search_nodes(point down, point top)
@@ -803,6 +800,9 @@ std::vector<node_abstraction> orderedListArrayList::range_search_nodes(point dow
 			}
 		}
 		return to_return;
+	}
+	else {
+		throw ListErr("Incorrect top and down");
 	}
 }
 
@@ -825,7 +825,7 @@ void binaryTree::push(point item)
 	}
 }
 
-void binaryTree::push(point item, int number)
+void binaryTree::push(point item, long long number)
 {
 	if (number > 0) {
 		if (!root) {
@@ -836,7 +836,7 @@ void binaryTree::push(point item, int number)
 		}
 	}
 	else {
-		//
+		throw ListErr("Incorrect number");
 	}
 }
 
@@ -849,12 +849,11 @@ void binaryTree::push_random(long long number)
 
 void binaryTree::show(size_t pos)
 {
-	//std::cout << &this[pos];
 	if (size == 0) {
-		//std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 	else if (pos > size - 1) {
-		//std::cout << "Incorrect position" << std::endl;
+		throw ListErr("Incorrect pos");
 	}
 	else {
 		size_t counter = 0;
@@ -868,10 +867,10 @@ void binaryTree::show(size_t pos)
 point binaryTree::operator[](size_t index)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	if (index > size - 1) {
-		//std::cout << "Error. Out of range" << std::endl;
+		throw ListErr("Incorrect index");
 	}
 	else {
 		size_t counter = 0;
@@ -888,7 +887,7 @@ node_abstraction binaryTree::value_search(point value)
 		return { value,-1 };
 	}
 	else {
-		int counter = 0;
+		long long counter = 0;
 		int index = value_search(value, counter, root) - 1;
 		return { value, index };
 	}
@@ -920,14 +919,13 @@ bool binaryTree::is_value(point value, binaryNode* node)
 	}
 }
 
-int binaryTree::value_search(point value, int& counter, binaryNode* node)
+long long binaryTree::value_search(point value, long long& counter, binaryNode* node)
 {
 	if (node) {
 		if (node->item > value) {
 			return value_search(value, counter, node->left);
 		}
 		else if (node->item == value) {
-			counter++;
 			return counter;
 		}
 		else {
@@ -959,51 +957,63 @@ void binaryTree::range_search_values(point down, point top, std::vector<point>& 
 
 void binaryTree::push(point value, binaryNode* node)
 {
-	if (value < node->item) {
-		if (node->left) {
-			push(value, node->left);
+	if (node) {
+		if (value < node->item) {
+			if (node->left) {
+				push(value, node->left);
+			}
+			else {
+				node->left = new binaryNode(value);
+				node->left->parent = node;
+				size++;
+			}
 		}
 		else {
-			node->left = new binaryNode(value);
-			node->left->parent = node;
-			size++;
-		}
-	}
-	else {
-		if (node->right) {
-			push(value, node->right);
-		}
-		else {
-			node->right = new binaryNode(value);
-			node->right->parent = node;
-			size++;
-		}
-	}
-}
-
-void binaryTree::push(point value, int number, binaryNode*& node)
-{
-	if (value < node->item) {
-		if (node->left) {
-			push(value, node->left);
-		}
-		else {
-			last_push(value, number, node->left, node);
-		}
-	}
-	else {
-		if (node->right) {
-			push(value, node->right);
-		}
-		else {
-			last_push(value, number, node->right, node);
+			if (node->right) {
+				push(value, node->right);
+			}
+			else {
+				node->right = new binaryNode(value);
+				node->right->parent = node;
+				size++;
+			}
 		}
 	}
 }
 
-void binaryTree::last_push(point value, int number, binaryNode*& node, binaryNode* parent)
+void binaryTree::push(point value, long long number, binaryNode*& node)
 {
-	if (number == 0) {
+	if (node) {
+		if (number > 0) {
+			if (value < node->item) {
+				if (node->left) {
+					push(value, node->left);
+				}
+				else {
+					last_push(value, number, node->left, node);
+				}
+			}
+			else {
+				if (node->right) {
+					push(value, node->right);
+				}
+				else {
+					last_push(value, number, node->right, node);
+				}
+			}
+		}
+		else {
+			throw ListErr("Incorrect number");
+		}
+	}
+}
+
+void binaryTree::last_push(point value, long long number, binaryNode*& node, binaryNode* parent)
+{
+	if (number < 0) {
+		throw ListErr("Incorrect number");
+	}
+	else if (number == 0) {
 		return;
 	}
 	else {
@@ -1014,7 +1024,7 @@ void binaryTree::last_push(point value, int number, binaryNode*& node, binaryNod
 	}
 }
 
-void binaryTree::last_push(point value, int number, binaryNode*& node, binaryNode* left, binaryNode* right, binaryNode* parent)
+void binaryTree::last_push(point value, long long number, binaryNode*& node, binaryNode* left, binaryNode* right, binaryNode* parent)
 {
 	node = new binaryNode(value);
 	node->parent = parent;
@@ -1031,11 +1041,10 @@ void binaryTree::last_push(point value, int number, binaryNode*& node, binaryNod
 	}
 }
 
-bool binaryTree::erase(size_t pos, int& counter, binaryNode*& node)
+bool binaryTree::erase(size_t pos, long long& counter, binaryNode*& node)
 {
 	if (node) {
 		if (erase(pos, counter, node->left) == false) {
-			counter++;
 			if (counter == pos) {
 				if (node->right == nullptr && node->left) {
 					binaryNode* help = node->left;
@@ -1090,6 +1099,9 @@ bool binaryTree::erase(size_t pos, int& counter, binaryNode*& node)
 				}
 				size--;
 				return true;
+			}
+			else {
+				counter++;
 			}
 			if (erase(pos, counter, node->right) == true) {
 				return true;
@@ -1223,18 +1235,23 @@ void AVL_tree::push(point item)
 
 void AVL_tree::push_random(long long number)
 {
-	for (long long i = 0; i < number; i++) {
-		push(point(number));
+	if (number > 0) {
+		for (long long i = 0; i < number; i++) {
+			push(point(number));
+		}
+	}
+	else {
+		throw ListErr("Incorrect number");
 	}
 }
 
 void AVL_tree::show(size_t pos)
 {
 	if (size == 0) {
-		//std::cout << "This list is empty" << std::endl;
+		throw ListErr("Empty list");
 	}
 	else if (pos > size - 1) {
-		//std::cout << "Incorrect position" << std::endl;
+		throw ListErr("Incorrect pos");
 	}
 	else {
 		size_t counter = 0;
@@ -1248,10 +1265,10 @@ void AVL_tree::show(size_t pos)
 point AVL_tree::operator[](size_t index)
 {
 	if (size == 0) {
-
+		throw ListErr("Empty list");
 	}
 	if (index > size - 1) {
-		//std::cout << "Error. Out of range" << std::endl;
+		throw ListErr("Incorrect index");
 	}
 	else {
 		size_t counter = 0;
@@ -1268,7 +1285,7 @@ node_abstraction AVL_tree::value_search(point value)
 		return { value,-1 };
 	}
 	else {
-		int counter = 0;
+		long long counter = 0;
 		int index = value_search(value, counter, root) - 1;
 		return { value, index };
 	}
@@ -1299,14 +1316,13 @@ bool AVL_tree::is_value(point value, Node* node)
 	}
 }
 
-int AVL_tree::value_search(point value, int& counter, Node* node)
+long long AVL_tree::value_search(point value, long long& counter, Node* node)
 {
 	if (node) {
 		if (node->item > value) {
 			return value_search(value, counter, node->left);
 		}
 		else if (node->item == value) {
-			counter++;
 			return counter;
 		}
 		else {
@@ -1321,18 +1337,23 @@ int AVL_tree::value_search(point value, int& counter, Node* node)
 
 void AVL_tree::range_search_values(point down, point top, std::vector<point>& to_return, Node* node)
 {
-	if (node) {
-		if (down < node->item && node->item < top) {
-			to_return.push_back(node->item);
-			range_search_values(down, top, to_return, node->left);
-			range_search_values(down, top, to_return, node->right);
+	if (down < top) {
+		if (node) {
+			if (down < node->item && node->item < top) {
+				to_return.push_back(node->item);
+				range_search_values(down, top, to_return, node->left);
+				range_search_values(down, top, to_return, node->right);
+			}
+			else if (node->item < down) {
+				range_search_values(down, top, to_return, node->right);
+			}
+			else if (node->item > top) {
+				range_search_values(down, top, to_return, node->left);
+			}
 		}
-		else if (node->item < down) {
-			range_search_values(down, top, to_return, node->right);
-		}
-		else if (node->item > top) {
-			range_search_values(down, top, to_return, node->left);
-		}
+	}
+	else {
+		throw ListErr("Incorrect down and top");
 	}
 }
 
@@ -1350,11 +1371,10 @@ void AVL_tree::delete_subtree(Node*& node)
 	}
 }
 
-bool AVL_tree::erase(size_t pos, int& counter, Node*& node)
+bool AVL_tree::erase(size_t pos, long long& counter, Node*& node)
 {
 	if (node) {
 		if (erase(pos, counter, node->left) == false) {
-			counter++;
 			if (counter == pos) {
 				if (node->right == nullptr && node->left) {
 					Node* help = node->left;
@@ -1409,6 +1429,9 @@ bool AVL_tree::erase(size_t pos, int& counter, Node*& node)
 				}
 				size--;
 				return true;
+			}
+			else {
+				counter++;
 			}
 			if (erase(pos, counter, node->right) == true) {
 				return true;
@@ -1481,45 +1504,53 @@ std::vector<point> Tree_2_3::range_search_values(point down, point top)
 		range_search_values(down, top, to_return, root);
 		return to_return;
 	}
+	else {
+		throw ListErr("Incorrect down and top");
+	}
 }
 
 void Tree_2_3::range_search_values(point down, point top, std::vector<point>& to_return, Node* node)
 {
-	if (node) {
-		if (node->size == 1) {
-			if (down < node->key[0] && node->key[0] < top) {
-				to_return.push_back(node->key[0]);
-				range_search_values(down, top, to_return, node->first);
-				range_search_values(down, top, to_return, node->second);
+	if (down < top) {
+		if (node) {
+			if (node->size == 1) {
+				if (down < node->key[0] && node->key[0] < top) {
+					to_return.push_back(node->key[0]);
+					range_search_values(down, top, to_return, node->first);
+					range_search_values(down, top, to_return, node->second);
+				}
+				else if (node->key[0] < down) {
+					range_search_values(down, top, to_return, node->second);
+				}
+				else if (node->key[0] > top) {
+					range_search_values(down, top, to_return, node->first);
+				}
 			}
-			else if (node->key[0] < down) {
-				range_search_values(down, top, to_return, node->second);
-			}
-			else if (node->key[0] > top) {
-				range_search_values(down, top, to_return, node->first);
+			else if (node->size == 2) {
+				if (down < node->key[0] && node->key[0] < top) {
+					to_return.push_back(node->key[0]);
+					range_search_values(down, top, to_return, node->first);
+					range_search_values(down, top, to_return, node->second);
+				}
+				else if (down < node->key[1] && node->key[1] < top) {
+					to_return.push_back(node->key[1]);
+					range_search_values(down, top, to_return, node->second);
+					range_search_values(down, top, to_return, node->third);
+				}
+				else if (node->key[0] > top) {
+					range_search_values(down, top, to_return, node->first);
+				}
+				else if (node->key[1] < down) {
+					range_search_values(down, top, to_return, node->third);
+				}
+				else if (node->key[0] < down || node->key[1] > top) {
+					range_search_values(down, top, to_return, node->second);
+				}
 			}
 		}
-		else if (node->size == 2) {
-			if (down < node->key[0] && node->key[0] < top) {
-				to_return.push_back(node->key[0]);
-				range_search_values(down, top, to_return, node->first);
-				range_search_values(down, top, to_return, node->second);
-			}
-			else if (down < node->key[1] && node->key[1] < top) {
-				to_return.push_back(node->key[1]);
-				range_search_values(down, top, to_return, node->second);
-				range_search_values(down, top, to_return, node->third);
-			}
-			else if (node->key[0] > top) {
-				range_search_values(down, top, to_return, node->first);
-			}
-			else if (node->key[1] < down) {
-				range_search_values(down, top, to_return, node->third);
-			}
-			else if (node->key[0] < down || node->key[1] > top) {
-				range_search_values(down, top, to_return, node->second);
-			}
-		}
+	}
+	else {
+		throw ListErr("Incorrect down and top");
 	}
 }
 
@@ -1567,16 +1598,20 @@ void Tree_2_3::action(void(*fooPointer)(point& a), Node* node)
 
 void Tree_2_3::push_random(long long number)
 {
-	for (long long i = 0; i < number; i++) {
-		push(point(number));
+	if (number > 0) {
+		for (long long i = 0; i < number; i++) {
+			push(point(number));
+		}
+	}
+	else {
+		throw ListErr("Incorrect number");
 	}
 }
 
 void demomode()
 {
-	try
-	{
-		std::ifstream in("in.txt");
+	std::ifstream in("in.txt");
+	if (in) {
 		std::streambuf* cinbuf = std::cin.rdbuf();
 		std::cin.rdbuf(in.rdbuf());
 
@@ -1584,8 +1619,7 @@ void demomode()
 
 		std::cin.rdbuf(cinbuf);
 	}
-	catch (const std::exception&)
-	{
+	else {
 		std::cout << "Problems with file" << std::endl;
 	}
 }
@@ -1688,7 +1722,7 @@ void commands(int what_structure, long long number = -1)
 			std::vector<std::string> all_commands;
 			while (ss >> part) all_commands.push_back(part);
 			if (all_commands.size() == 1 && all_commands[0] == "help") {
-				//std::cout << help_linked_answer << std::endl;
+				std::cout << help_answer << std::endl;
 			}
 			else if (all_commands.size() == 2 && all_commands[0] == "pop" && all_commands[1] == "front") {
 				try
@@ -2108,7 +2142,7 @@ void commands(int what_structure, long long number = -1)
 			std::vector<std::string> all_commands;
 			while (ss >> part) all_commands.push_back(part);
 			if (all_commands.size() == 1 && all_commands[0] == "help") {
-				//std::cout << help_linked_answer << std::endl;
+				std::cout << help_answer << std::endl;
 			}
 			else if (all_commands.size() == 2 && all_commands[0] == "pop" && all_commands[1] == "front") {
 				try
@@ -2182,6 +2216,69 @@ void commands(int what_structure, long long number = -1)
 					try
 					{
 						structure.push(point(arguments[0], arguments[1], arguments[2]), a);
+						std::cout << "Successfully added" << std::endl;
+					}
+					catch (const std::exception& ex)
+					{
+						std::cout << ex.what() << std::endl;
+					}
+				}
+				else {
+					std::cout << "Incorrect argument. help for reference" << std::endl;
+				}
+			}
+			else if (all_commands.size() == 5 && all_commands[1] == "quick" && all_commands[1] == "push") {
+				std::vector<double>arguments;
+				bool correct = true;
+				for (size_t i = 2; i < all_commands.size(); i++) {
+					std::stringstream ss(all_commands[i]);
+					double a;
+					if (ss >> a) {
+						arguments.push_back(a);
+					}
+					else {
+						correct = false;
+						break;
+					}
+				}
+				if (correct) {
+					try
+					{
+						structure.quick_push(point(arguments[0], arguments[1], arguments[2]));
+						std::cout << "Successfully added" << std::endl;
+					}
+					catch (const std::exception& ex)
+					{
+						std::cout << ex.what() << std::endl;
+					}
+				}
+				else {
+					std::cout << "Incorrect argument. help for reference" << std::endl;
+				}
+			}
+			else if (all_commands.size() == 5 && all_commands[0] == "quick" && all_commands[1] == "push") {
+				std::vector<double>arguments;
+				bool correct = true;
+				for (size_t i = 2; i < all_commands.size() - 1; i++) {
+					std::stringstream ss(all_commands[i]);
+					double a;
+					if (ss >> a) {
+						arguments.push_back(a);
+					}
+					else {
+						correct = false;
+						break;
+					}
+				}
+				std::stringstream ss(all_commands[4]);
+				long long a;
+				if (!(ss >> a)) {
+					correct = false;
+				}
+				if (correct && a > 0) {
+					try
+					{
+						structure.quick_push(point(arguments[0], arguments[1], arguments[2]), a);
 						std::cout << "Successfully added" << std::endl;
 					}
 					catch (const std::exception& ex)
@@ -2528,7 +2625,7 @@ void commands(int what_structure, long long number = -1)
 			std::vector<std::string> all_commands;
 			while (ss >> part) all_commands.push_back(part);
 			if (all_commands.size() == 1 && all_commands[0] == "help") {
-				//std::cout << help_linked_answer << std::endl;
+				std::cout << help_answer  << std::endl;
 			}
 			else if (all_commands.size() == 4 && all_commands[0] == "push") {
 				std::vector<double>arguments;
@@ -2892,7 +2989,7 @@ void commands(int what_structure, long long number = -1)
 			std::vector<std::string> all_commands;
 			while (ss >> part) all_commands.push_back(part);
 			if (all_commands.size() == 1 && all_commands[0] == "help") {
-				//std::cout << help_linked_answer << std::endl;
+				std::cout << help_answer << std::endl;
 			}
 			else if (all_commands.size() == 4 && all_commands[0] == "push") {
 				std::vector<double>arguments;
@@ -3196,7 +3293,7 @@ void commands(int what_structure, long long number = -1)
 			std::vector<std::string> all_commands;
 			while (ss >> part) all_commands.push_back(part);
 			if (all_commands.size() == 1 && all_commands[0] == "help") {
-				//std::cout << help_linked_answer << std::endl;
+				std::cout << help_answer << std::endl;
 			}
 			else if (all_commands.size() == 4 && all_commands[0] == "push") {
 				std::vector<double>arguments;

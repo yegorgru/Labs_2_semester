@@ -12,6 +12,12 @@
 
 extern std::mt19937 mersenne;
 
+class ListErr :public std::logic_error
+{
+public:
+	explicit ListErr(const char* message) :logic_error(message) {}
+};
+
 void commands();
 void demomode();
 void benchmark();
@@ -51,9 +57,9 @@ struct point {
 
 struct node_abstraction {
 	point value;
-	int position;
+	long long position;
 
-	node_abstraction(point value, int position) {
+	node_abstraction(point value, long long position) {
 		this->value = value;
 		this->position = position;
 	}
@@ -166,9 +172,9 @@ public:
 
 	void quick_push(point value);
 
-	void push(point value, int number);
+	void push(point value, long long number);
 
-	void quick_push(point value, int number);
+	void quick_push(point value, long long number);
 
 	void push_random(long long number);
 
@@ -233,7 +239,7 @@ public:
 
 	void push(point item);
 
-	void push(point item, int number);
+	void push(point item, long long number);
 
 	void push_random(long long number);
 
@@ -243,24 +249,24 @@ public:
 
 	void erase(size_t pos) {
 		if (pos < size) {
-			int counter = -1;
+			long long counter = 0;
 			erase(pos, counter, root);
 		}
 		else {
-			//
+			throw ListErr("Incorrect pos");
 		}
 	}
 
 	void erase(size_t begin, size_t end) {
 		if (begin < size && end < size && begin < end) {
 			for (size_t i = 0; i < end - begin + 1; i++) {
-				int counter = -1;
+				long long counter = -1;
 				erase(begin, counter, root);
 				begin++;
 			}
 		}
 		else {
-			//
+			throw ListErr("Incorrect begin and end");
 		}
 	}
 
@@ -304,11 +310,11 @@ private:
 					return check_return;
 				}
 			}
-			counter++;
 			if (counter == pos) {
 				return node;
 			}
 			if (node->right) {
+				counter++;
 				check_return = get_node(pos, counter, node->right);
 				if (check_return) {
 					return check_return;
@@ -320,19 +326,19 @@ private:
 
 	bool is_value(point value, binaryNode* node);
 
-	int value_search(point value, int& counter, binaryNode* node);
+	long long value_search(point value, long long& counter, binaryNode* node);
 
 	void range_search_values(point down, point top, std::vector<point>& to_retur, binaryNode* node);
 
 	void push(point value, binaryNode* node);
 
-	void push(point value, int number, binaryNode*& node);
+	void push(point value, long long number, binaryNode*& node);
 
-	void last_push(point value, int number, binaryNode*& node, binaryNode* parent);
+	void last_push(point value, long long number, binaryNode*& node, binaryNode* parent);
 
-	void last_push(point value, int number, binaryNode*& node, binaryNode* left, binaryNode* right, binaryNode* parent);
+	void last_push(point value, long long number, binaryNode*& node, binaryNode* left, binaryNode* right, binaryNode* parent);
 
-	bool erase(size_t pos, int& counter, binaryNode*& node);
+	bool erase(size_t pos, long long& counter, binaryNode*& node);
 
 	void erase(point value, binaryNode*& node);
 
@@ -378,6 +384,19 @@ public:
 		delete_subtree(root);
 	}
 
+	void erase(size_t begin, size_t end) {
+		if (begin < size && end < size && begin < end) {
+			for (size_t i = 0; i < end - begin + 1; i++) {
+				long long counter = -1;
+				erase(begin, counter, root);
+				begin++;
+			}
+		}
+		else {
+			throw ListErr("Incorrect begin and end");
+		}
+	}
+
 	void clear() {
 		delete_subtree(root);
 	}
@@ -387,16 +406,18 @@ public:
 	void push_random(long long number);
 
 	void erase(point value) {
-		root = erase(value, root);
+		if (root) {
+			root = erase(value, root);
+		}
 	}
 
 	void erase(size_t pos) {
 		if (pos < size) {
-			int counter = -1;
+			long long counter = 0;
 			erase(pos, counter, root);
 		}
 		else {
-			//
+			throw ListErr("Incorrect pos");
 		}
 	}
 
@@ -432,7 +453,7 @@ public:
 
 private:
 
-	bool erase(size_t pos, int& counter, Node*& node);
+	bool erase(size_t pos, long long& counter, Node*& node);
 
 	Node* erase_min(Node* node)
 	{
@@ -549,11 +570,11 @@ private:
 					return check_return;
 				}
 			}
-			counter++;
 			if (counter == pos) {
 				return node;
 			}
 			if (node->right) {
+				counter++;
 				check_return = get_node(pos, counter, node->right);
 				if (check_return) {
 					return check_return;
@@ -565,7 +586,7 @@ private:
 
 	bool is_value(point value, Node* node);
 
-	int value_search(point value, int& counter, Node* node);
+	long long value_search(point value, long long& counter, Node* node);
 
 	void range_search_values(point down, point top, std::vector<point>& to_return, Node* node);
 
@@ -729,7 +750,9 @@ public:
 	}
 
 	void erase(point value) {
-		root = erase(root, value);
+		if (root) {
+			root = erase(root, value);
+		}
 	}
 
 	void show() {
