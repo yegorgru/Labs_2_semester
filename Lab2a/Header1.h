@@ -49,8 +49,8 @@ namespace firstList {
 				return 0;
 			}
 			else {
-				for (size_t i = 0; i < size; i++) {
-					list[i + 1] = list[i];
+				for (int i = size; i > 0; i--) {
+					list[i] = list[i - 1];
 				}
 				list[0] = value;
 				size++;
@@ -61,7 +61,6 @@ namespace firstList {
 		bool pop_back() {
 			if (size > 0) {
 				size--;
-				list[size];
 				return 1;
 			}
 			else {
@@ -72,9 +71,13 @@ namespace firstList {
 
 
 		bool pop_front() {
-			if (size > 0) {
+			if (size == 1) {
+				size = 0;
+				return 1;
+			}
+			else if (size > 1) {
 				for (size_t i = 1; i < size; i++) {
-					list[i] = list[i + 1];
+					list[i - 1] = list[i];
 				}
 				size--;
 				return 1;
@@ -99,8 +102,8 @@ namespace firstList {
 				return 0;
 			}
 			else {
-				for (int i = 0; i < size - pos; i++) {
-					list[pos + 1 + i] = list[pos + i];
+				for (size_t i = size; i > pos; i--) {
+					list[i] = list[i-1];
 				}
 				list[pos] = value;
 				size++;
@@ -126,8 +129,8 @@ namespace firstList {
 				return 0;
 			}
 			else {
-				for (size_t i = 0; i < size - pos; i++) {
-					list[pos + number + i] = list[pos + i];
+				for (size_t i = size+number-1; i > pos+number-1; i--) {
+					list[i] = list[i-number];
 				}
 				for (int i = 0; i < number; i++) {
 					list[pos + i] = value;
@@ -165,8 +168,8 @@ namespace firstList {
 				return 0;
 			}
 			else {
-				for (size_t i =0; i < end-begin+1; i++) {
-					list[begin+i] = list[end+i+1];
+				for (size_t i = begin; i < size - end + begin - 1; i++) {
+					list[i] = list[i + end - begin + 1];
 				}
 				size -= end - begin + 1;
 				return 1;
