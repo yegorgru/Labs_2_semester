@@ -1,11 +1,8 @@
 linked
+show
 push 4.3 1.2 -5.4
 show
-quick push -1 -3.3 100
-show
 push 5.6 2.3 0 2
-show
-quick push -8.7 25.2 5 3
 show
 pop back
 show
@@ -13,19 +10,20 @@ pop front
 show
 push random 5
 show
-erase 4.3 1.2 -5.4
+erase 5.6 2.3 0
 show
 show 2
 erase 2
-show
+show 2
 push random 5
 show
 erase 2 5
+show
 is value 4.3 1.2 -5.4
-push -10 -10 -10
-is value -10 -10 -10
+push 0 0 0
+is value 0 0 0
 value search 4.3 1.2 -5.4
-value search -10 -10 -10
+value search 0 0 0
 range search values -5 -5 -5 5 5 5
 range search nodes -5 -5 -5 5 5 5
 action x plus
@@ -42,11 +40,12 @@ action z minus
 show
 end
 array 100
+show
 push 4.3 1.2 -5.4
 show
-quick push -1 -3.3 100
-show
 push 5.6 2.3 0 2
+show
+quick push -1 -3.3 100
 show
 quick push -8.7 25.2 5 3
 show
@@ -56,19 +55,20 @@ pop front
 show
 push random 5
 show
-erase 4.3 1.2 -5.4
+erase 5.6 2.3 0
 show
 show 2
 erase 2
-show
+show 2
 push random 5
 show
 erase 2 5
+show
 is value 4.3 1.2 -5.4
-push -10 -10 -10
-is value -10 -10 -10
+push 0 0 0
+is value 0 0 0
 value search 4.3 1.2 -5.4
-value search -10 -10 -10
+value search 0 0 0
 range search values -5 -5 -5 5 5 5
 range search nodes -5 -5 -5 5 5 5
 action x plus
@@ -85,35 +85,23 @@ action z minus
 show
 end
 binary
+show
 push 4.3 1.2 -5.4
 show
-quick push -1 -3.3 100
-show
-push 5.6 2.3 0 2
-show
-quick push -8.7 25.2 5 3
-show
-pop back
-show
-pop front
+push 5.6 2.3 0
 show
 push random 5
 show
 erase 4.3 1.2 -5.4
 show
 show 2
-erase 2
-show
-push random 5
-show
-erase 2 5
 is value 4.3 1.2 -5.4
-push -10 -10 -10
-is value -10 -10 -10
+push 0 0 0
+is value 0 0 0
+show
 value search 4.3 1.2 -5.4
-value search -10 -10 -10
+value search 0 0 0
 range search values -5 -5 -5 5 5 5
-range search nodes -5 -5 -5 5 5 5
 action x plus
 show
 action x minus
@@ -128,35 +116,23 @@ action z minus
 show
 end
 AVL
+show
 push 4.3 1.2 -5.4
 show
-quick push -1 -3.3 100
-show
-push 5.6 2.3 0 2
-show
-quick push -8.7 25.2 5 3
-show
-pop back
-show
-pop front
+push 5.6 2.3 0
 show
 push random 5
 show
 erase 4.3 1.2 -5.4
 show
 show 2
-erase 2
-show
-push random 5
-show
-erase 2 5
 is value 4.3 1.2 -5.4
-push -10 -10 -10
-is value -10 -10 -10
+push 0 0 0
+is value 0 0 0
+show
 value search 4.3 1.2 -5.4
-value search -10 -10 -10
+value search 0 0 0
 range search values -5 -5 -5 5 5 5
-range search nodes -5 -5 -5 5 5 5
 action x plus
 show
 action x minus
@@ -171,35 +147,19 @@ action z minus
 show
 end
 2-3
+show
 push 4.3 1.2 -5.4
 show
-quick push -1 -3.3 100
-show
-push 5.6 2.3 0 2
-show
-quick push -8.7 25.2 5 3
-show
-pop back
-show
-pop front
+push 5.6 2.3 0
 show
 push random 5
 show
 erase 4.3 1.2 -5.4
 show
-show 2
-erase 2
-show
-push random 5
-show
-erase 2 5
 is value 4.3 1.2 -5.4
-push -10 -10 -10
-is value -10 -10 -10
-value search 4.3 1.2 -5.4
-value search -10 -10 -10
+push 0 0 0
+is value 0 0 0
 range search values -5 -5 -5 5 5 5
-range search nodes -5 -5 -5 5 5 5
 action x plus
 show
 action x minus

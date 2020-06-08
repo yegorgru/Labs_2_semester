@@ -25,9 +25,9 @@ void benchmark();
 bool is_int(const std::string& str);
 
 struct point {
-	double x = 0;
-	double y = 0;
-	double z = 0;
+	double x;
+	double y;
+	double z;
 
 	point() {
 		x = 0;
@@ -36,9 +36,9 @@ struct point {
 	}
 
 	point(long long diapason) {
-		this->x = mersenne() % (2 * diapason) - diapason + (mersenne() % (2 * diapason) - diapason) * pow(10, -rand() % 4);
-		this->y = mersenne() % (2 * diapason) - diapason + (mersenne() % (2 * diapason) - diapason) * pow(10, -rand() % 4);
-		this->z = mersenne() % (2 * diapason) - diapason + (mersenne() % (2 * diapason) - diapason) * pow(10, -rand() % 4);
+		this->x = mersenne() % (2 * diapason) - diapason + (mersenne() % (2 * diapason) - diapason) * pow(10, -(rand() % 4));
+		this->y = mersenne() % (2 * diapason) - diapason + (mersenne() % (2 * diapason) - diapason) * pow(10, -(rand() % 4));
+		this->z = mersenne() % (2 * diapason) - diapason + (mersenne() % (2 * diapason) - diapason) * pow(10, -(rand() % 4));
 	}
 
 	point(double x, double y, double z) {
@@ -84,6 +84,10 @@ class orderedListLinkedList {
 	size_t size;
 
 public:
+
+	size_t length() {
+		return this->size;
+	}
 
 	orderedListLinkedList() {
 		head = nullptr;
@@ -148,7 +152,7 @@ public:
 	orderedListArrayList(size_t max) {
 		list = new point[max];
 		max_size = max;
-		this->size = 0;
+		size = 0;
 	}
 	
 	orderedListArrayList() {
@@ -162,6 +166,10 @@ public:
 			delete[] list;
 			list = nullptr;
 		}
+	}
+
+	size_t length() {
+		return this->size;
 	}
 
 	void pop_back();
@@ -204,13 +212,11 @@ public:
 class binaryTree {
 	struct binaryNode {
 		point item;
-		binaryNode* parent;
 		binaryNode* left;
 		binaryNode* right;
 
 		binaryNode(point value) {
 			item = value;
-			parent = nullptr;
 			left = nullptr;
 			right = nullptr;
 		}
@@ -233,41 +239,20 @@ public:
 		delete_subtree(root);
 	}
 
+	size_t length() {
+		return this->size;
+	}
+
 	void clear() {
 		delete_subtree(root);
 	}
 
 	void push(point item);
 
-	void push(point item, long long number);
-
 	void push_random(long long number);
 
 	void erase(point value) {
-		erase(value, root);
-	}
-
-	void erase(size_t pos) {
-		if (pos < size) {
-			long long counter = 0;
-			erase(pos, counter, root);
-		}
-		else {
-			throw ListErr("Incorrect pos");
-		}
-	}
-
-	void erase(size_t begin, size_t end) {
-		if (begin < size && end < size && begin < end) {
-			for (size_t i = 0; i < end - begin + 1; i++) {
-				long long counter = -1;
-				erase(begin, counter, root);
-				begin++;
-			}
-		}
-		else {
-			throw ListErr("Incorrect begin and end");
-		}
+		root = erase(value, root);
 	}
 
 	void show() {
@@ -313,8 +298,8 @@ private:
 			if (counter == pos) {
 				return node;
 			}
+			counter++;
 			if (node->right) {
-				counter++;
 				check_return = get_node(pos, counter, node->right);
 				if (check_return) {
 					return check_return;
@@ -328,19 +313,50 @@ private:
 
 	long long value_search(point value, long long& counter, binaryNode* node);
 
-	void range_search_values(point down, point top, std::vector<point>& to_retur, binaryNode* node);
+	void range_search_values(point down, point top, std::vector<point>& to_return, binaryNode* node);
 
 	void push(point value, binaryNode* node);
 
-	void push(point value, long long number, binaryNode*& node);
-
-	void last_push(point value, long long number, binaryNode*& node, binaryNode* parent);
-
-	void last_push(point value, long long number, binaryNode*& node, binaryNode* left, binaryNode* right, binaryNode* parent);
-
-	bool erase(size_t pos, long long& counter, binaryNode*& node);
-
-	void erase(point value, binaryNode*& node);
+	binaryNode* erase(point value, binaryNode*& node) {
+		if (node == nullptr) {
+			return node;
+		}
+		else if (value < node->item) {
+			node->left = erase(value, node->left);
+		}
+		else if (value > node->item) {
+			node->right = erase(value, node->right);
+		}
+		else if (node->left != nullptr && node->right != nullptr) {
+			binaryNode* search = node->right;
+			while (search->left) {
+				search = search->left;
+			}
+			node->item = search->item;
+			node->right = erase(node->item, node->right);
+		}
+		else {
+			if (node->left != nullptr) {
+				binaryNode* help = node->left;
+				node->item = help->item;
+				node->right = help->right;
+				node->left = help->left;
+				delete help;
+			}
+			else if (node->right != nullptr) {
+				binaryNode* help = node->right;
+				node->item = help->item;
+				node->right = help->right;
+				node->left = help->left;
+				delete help;
+			}
+			else {
+				delete node;
+				node = nullptr;
+			}
+		}
+		return node;
+	}
 
 	void delete_subtree(binaryNode*& node);
 
@@ -353,14 +369,12 @@ class AVL_tree {
 	struct Node {
 		point item;
 		unsigned char height;
-		Node* parent;
 		Node* left;
 		Node* right;
 
 		Node(point value) {
 			item = value;
 			height = 1;
-			parent = nullptr;
 			left = nullptr;
 			right = nullptr;
 		}
@@ -384,17 +398,8 @@ public:
 		delete_subtree(root);
 	}
 
-	void erase(size_t begin, size_t end) {
-		if (begin < size && end < size && begin < end) {
-			for (size_t i = 0; i < end - begin + 1; i++) {
-				long long counter = -1;
-				erase(begin, counter, root);
-				begin++;
-			}
-		}
-		else {
-			throw ListErr("Incorrect begin and end");
-		}
+	size_t length() {
+		return this->size;
 	}
 
 	void clear() {
@@ -408,16 +413,6 @@ public:
 	void erase(point value) {
 		if (root) {
 			root = erase(value, root);
-		}
-	}
-
-	void erase(size_t pos) {
-		if (pos < size) {
-			long long counter = 0;
-			erase(pos, counter, root);
-		}
-		else {
-			throw ListErr("Incorrect pos");
 		}
 	}
 
@@ -452,8 +447,6 @@ public:
 	}
 
 private:
-
-	bool erase(size_t pos, long long& counter, Node*& node);
 
 	Node* erase_min(Node* node)
 	{
@@ -520,9 +513,7 @@ private:
 	Node* rotate_right(Node* node) {
 		Node* to_return = node->left;
 		node->left = to_return->right;
-		to_return->right->parent = node;
 		to_return->right = node;
-		node->parent = to_return;
 		calculate_height(node);
 		calculate_height(to_return);
 		return to_return;
@@ -531,9 +522,7 @@ private:
 	Node* rotate_left(Node* node) {
 		Node* to_return = node->right;
 		node->right = to_return->left;
-		to_return->left->parent = node;
 		to_return->left = node;
-		node->parent = to_return;
 		calculate_height(node);
 		calculate_height(to_return);
 		return to_return;
@@ -573,8 +562,8 @@ private:
 			if (counter == pos) {
 				return node;
 			}
+			counter++;
 			if (node->right) {
-				counter++;
 				check_return = get_node(pos, counter, node->right);
 				if (check_return) {
 					return check_return;
@@ -595,22 +584,18 @@ private:
 		if (value < node->item) {
 			if (node->left) {
 				node->left = push(value, node->left);
-				node->left->parent = node;
 			}
 			else {
 				node->left = new Node(value);
-				node->left->parent = node;
 				size++;
 			}
 		}
 		else {
 			if (node->right) {
 				node->right = push(value, node->right);
-				node->right->parent = node;
 			}
 			else {
 				node->right = new Node(value);
-				node->right->parent = node;
 				size++;
 			}
 		}
@@ -708,8 +693,8 @@ class Tree_2_3 {
 		Node(point value) {
 			size = 1;
 			key[0] = value;
-			key[1] = 0;
-			key[2] = 0;
+			key[1] = { 0,0,0 };
+			key[2] = { 0,0,0 };
 			first = nullptr;
 			second = nullptr;
 			third = nullptr;
@@ -720,8 +705,8 @@ class Tree_2_3 {
 		Node(point value, Node* first, Node* second, Node* third, Node* fourth, Node* parent) {
 			size = 1;
 			key[0] = value;
-			key[1] = 0;
-			key[2] = 0;
+			key[1] = {0,0,0};
+			key[2] = { 0,0,0 };
 			this->first = first;
 			this->second = second;
 			this->third = third;
@@ -743,6 +728,10 @@ public:
 		delete_subtree(root);
 	}
 
+	size_t length() {
+		return this->size;
+	}
+
 	void delete_subtree(Node*& node);
 
 	void push(point value) {
@@ -756,7 +745,12 @@ public:
 	}
 
 	void show() {
-		show(root);
+		if (root) {
+			show(root);
+		}
+		else {
+			std::cout << "Nothing" << std::endl;
+		}
 	}
 
 	bool is_value(point value);
@@ -831,9 +825,11 @@ private:
 
 	Node* insert(Node* node, point value) {
 		if (!node) {
+			size++;
 			return new Node(value);
 		}
 		if (node->is_leaf()) {
+			size++;
 			node->insert_to_node(value);
 		}
 		else if (value <= node->key[0]) {
@@ -864,6 +860,7 @@ private:
 		else if (node->size == 2) {
 			return get_node(node->third, value);
 		}
+		return nullptr;
 	}
 
 	Node* regain(Node* node) {
@@ -1134,15 +1131,19 @@ private:
 		}
 		Node* min = nullptr;
 		if (item->key[0] == value) {
-			min = item->second;
-			while (min->first != nullptr) {
-				min = min->first;
+			if (item->second) {
+				min = item->second;
+				while (min->first != nullptr) {
+					min = min->first;
+				}
 			}
 		}
 		else {
-			min = item->third;
-			while (min->first != nullptr) {
-				min = min->first;
+			if (item->third) {
+				min = item->third;
+				while (min->first != nullptr) {
+					min = min->first;
+				}
 			}
 		}
 		if (min) {

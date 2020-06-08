@@ -1,7 +1,7 @@
 #include "Header.h"
 
 std::string main_help = "\n\ndemomode - launch demomode\nbenchmark - launch benchmark\nlinked - create ordered list as linked list\narray number - create ordered list as array with max number of points = number\nbinary - create ordered list as binary tree\nAVL - create ordered list as AVL tree\n2-3 - create ordered list as 2-3 tree\nexit - close program\n\n";
-std::string help_answer = "\n\npop back - erase last element\n\t\t(only for linked and array)\npop front - erase first element\n\t\t(only for linked and array)\npush x y z - push point with coordinates (x,y,z)\npush x y z number - push mumber points with coordinates (x,y,z)\n\t\t(isn't available for 2-3 and AVL)\npush random number - push number of random points\nquick push x y z - push point with coordinates (x,y,z)\n\t\t(only for array)\nquick push x y z number - push mumber points with coordinates (x,y,z)\n\t\t(only for array)\nerase x y z - erase point with coordinates (x, y, z)\nerase pos - erase point with position pos\n\t\t(unavailable for 2-3 tree)\nerase begin end - erase points with positions from begin to end\n\t\t(isn't available for 2-3 tree)\nshow - see ordered list\nshow pos - see point with position pos\n\t\t(isn't available for 2-3 tree)\nis value x y z - check if there is point with coordinates (x, y, z) in list\nvalue search x y z - see node abstraction (position) if point with this coordinates is in list\n\t\t(isn't available for 2-3 tree)\nrange search values x1 y1 z1 x2 y2 z2 - check what point from range A(x1, y1, z1) - B(x2, y2, z2) are in list\nrange search nodes x1 y1 z1 x2 y2 z2 - find out node abstractions (values and positions) of points from range A(x1, y1, z1) - B(x2, y2, z2) that are in list\n\t\t(isn't available for 2-3 and AVL trees)\naction x plus - increase x by 1 for all points\naction x minus - decrease x by 1 for all points\naction y plus - increase y by 1 for all points\naction y minus - decrease y by 1 for all points\naction z plus - increase z by 1 for all points\naction z minus - decrease z by 1 for all points\n";
+std::string help_answer = "\n\npop back - erase last element\n\t\t(only for linked and array)\npop front - erase first element\n\t\t(only for linked and array)\npush x y z - push point with coordinates (x,y,z)\npush x y z number - push mumber points with coordinates (x,y,z)\n\t\t(isn't available for 2-3, AVL and binary)\npush random number - push number of random points\nquick push x y z - push point with coordinates (x,y,z)\n\t\t(only for array)\nquick push x y z number - push mumber points with coordinates (x,y,z)\n\t\t(only for array)\nerase x y z - erase point with coordinates (x, y, z)\nerase pos - erase point with position pos\n\t\t(unavailable for 2-3 tree, binary and AVL)\nerase begin end - erase points with positions from begin to end\n\t\t(isn't available for 2-3 tree, binary and AVL)\nshow - see ordered list\nshow pos - see point with position pos\n\t\t(isn't available for 2-3 tree)\nis value x y z - check if there is point with coordinates (x, y, z) in list\nvalue search x y z - see node abstraction (position) if point with this coordinates is in list\n\t\t(isn't available for 2-3 tree)\nrange search values x1 y1 z1 x2 y2 z2 - check what points from range A(x1, y1, z1) - B(x2, y2, z2) are in list\nrange search nodes x1 y1 z1 x2 y2 z2 - find out node abstractions (values and positions) of points from range A(x1, y1, z1) - B(x2, y2, z2) that are in list\n\t\t(isn't available for 2-3, binary and AVL)\naction x plus - increase x by 1 for all points\naction x minus - decrease x by 1 for all points\naction y plus - increase y by 1 for all points\naction y minus - decrease y by 1 for all points\naction z plus - increase z by 1 for all points\naction z minus - decrease z by 1 for all points\n";
 
 
 bool operator>(const point& left, const point& right)
@@ -108,20 +108,24 @@ void orderedListLinkedList::push(point value)
 			{
 				current = next_current;
 				next_current = next_current->next;
-				if (next_current->next == nullptr && (next_current->value < value))
+				if (next_current->next == nullptr && (next_current->value <= value))
 				{
 					tail->next = new_node;
 					new_node->prev = tail;
 					tail = new_node;
+					break;
 				}
 				else if (value < next_current->value)
 				{
 					current->next = new_node;
 					new_node->next = next_current;
+					next_current->prev = new_node;
+					new_node->prev = current;
 					break;
 				}
 			}
 		}
+		size++;
 	}
 }
 
@@ -160,7 +164,7 @@ void orderedListLinkedList::push(point value, long long number)
 				new_nodes[0]->prev = head;
 				tail = new_nodes[number - 1];
 			}
-			size++;
+			size+=number;
 		}
 		else
 		{
@@ -190,6 +194,7 @@ void orderedListLinkedList::push(point value, long long number)
 					}
 				}
 			}
+			size += number;
 		}
 		delete[] new_nodes;
 	}
@@ -210,10 +215,11 @@ void orderedListLinkedList::push_random(long long number)
 	ListNode* node = tail;
 	while (counter != number-1 && node != nullptr) {
 		if (node->value < new_values[number - 2 - counter]) {
-			ListNode* new_node = new ListNode(new_values[number - 1 - counter]);
+			ListNode* new_node = new ListNode(new_values[number - 2 - counter]);
 			new_node->prev = node;
 			if (node->next) {
 				ListNode* help = node->next;
+				help->prev = new_node;
 				node->next = new_node;
 				new_node->next = help;
 			}
@@ -281,12 +287,15 @@ void orderedListLinkedList::erase(size_t pos)
 				search = search->next;
 			}
 			ListNode* to_erase = search->prev;
-			if (to_erase->prev) {
-				to_erase->prev->next = search;
+			if (to_erase) {
+				ListNode* prev = to_erase->prev;
+				if (prev != nullptr) {
+					prev->next = search;
+				}
+				search->prev = prev;
+				delete to_erase;
+				size--;
 			}
-			search->prev = to_erase->prev;
-			delete to_erase;
-			size--;
 		}
 	}
 }
@@ -314,7 +323,7 @@ void orderedListLinkedList::erase(size_t begin, size_t end)
 void orderedListLinkedList::show()
 {
 	if (size == 0) {
-		throw ListErr("Empty list");
+		std::cout<<"Empty list"<<std::endl;
 	}
 	else {
 		ListNode* to_show = head;
@@ -398,11 +407,16 @@ std::vector<point> orderedListLinkedList::range_search_values(point down, point 
 	if (head && down < top) {
 		std::vector<point>to_return;
 		ListNode* search = head;
-		while (search->value < top && search->next) {
+		while (search->value < top && search) {
 			if (search->value > down) {
 				to_return.push_back(search->value);
 			}
-			search = search->next;
+			if (search->next) {
+				search = search->next;
+			}
+			else {
+				break;
+			}
 		}
 		return to_return;
 	}
@@ -417,12 +431,17 @@ std::vector<node_abstraction> orderedListLinkedList::range_search_nodes(point do
 		std::vector<node_abstraction>to_return;
 		ListNode* search = head;
 		int i = 0;
-		while (search->value < top && search->next) {
+		while (search->value < top && search) {
 			if (search->value > down) {
 				to_return.push_back({search->value, i});
 			}
-			search = search->next;
-			i++;
+			if (search->next) {
+				search = search->next;
+				i++;
+			}
+			else {
+				break;
+			}
 		}
 		return to_return;
 	}
@@ -444,7 +463,6 @@ void orderedListArrayList::pop_back()
 {
 	if (size > 0) {
 		size--;
-		list[size];
 	}
 	else {
 		throw ListErr("Empty list");
@@ -453,9 +471,12 @@ void orderedListArrayList::pop_back()
 
 void orderedListArrayList::pop_front()
 {
-	if (size > 0) {
+	if (size == 1) {
+		size = 0;
+	}
+	else if (size > 1) {
 		for (size_t i = 1; i < size; i++) {
-			list[i] = list[i + 1];
+			list[i-1] = list[i];
 		}
 		size--;
 	}
@@ -472,7 +493,6 @@ void orderedListArrayList::push(point value)
 	else {
 		if (value > list[size - 1]) {
 			list[size] = value;
-			size++;
 		}
 		else if (value < list[0]) {
 			for (int i = size; i > 0; i--) {
@@ -548,7 +568,6 @@ void orderedListArrayList::push(point value, long long number)
 			for (int i = 0; i < number; i++) {
 				list[size + i] = value;
 			}
-			size += number;
 		}
 		else if (value < list[0]) {
 			for (int i = size - 1; i > -1; i--) {
@@ -630,13 +649,17 @@ void orderedListArrayList::push_random(long long number)
 		throw ListErr("List is full or too big number");
 	}
 	else {
+		push(point(number));
+		number--;
 		std::vector<point>new_values;
 		for (long long i = 0; i < number; i++) {
 			new_values.push_back(point(number));
 		}
-		quicksort(new_values, 0, number - 1);
+		if (number > 0) {
+			quicksort(new_values, 0, number - 1);
+		}
 		long long counter = number - 1;
-		size_t position = size - 1;
+		long long position = size - 1;
 		while (counter >= 0) {
 			if (list[position] < new_values[counter]) {
 				list[position + counter + 1] = new_values[counter];
@@ -645,6 +668,12 @@ void orderedListArrayList::push_random(long long number)
 			else {
 				list[position + counter + 1] = list[position];
 				position--;
+				if (position < 0) {
+					for (long long i = 0; i < counter+1; i++) {
+						list[i] = new_values[i];
+					}
+					break;
+				}
 			}
 		}
 		size += number;
@@ -653,12 +682,12 @@ void orderedListArrayList::push_random(long long number)
 
 void orderedListArrayList::erase(point value)
 {
-	int pos = 0;
-	int difference = 0;
-	for (size_t i = 0; i < size - 1; i++) {
+	size_t pos = 0;
+	size_t difference = 0;
+	for (size_t i = 0; i < size; i++) {
 		if (list[i] == value) {
 			pos = i;
-			while (list[i] == value) {
+			while (list[i] == value && i<size) {
 				i++;
 			}
 			difference = i - pos;
@@ -718,7 +747,7 @@ void orderedListArrayList::show()
 void orderedListArrayList::show(size_t pos)
 {
 	if (size == 0) {
-		throw ListErr("Empty list");
+		 std::cout<<"Empty list"<<std::endl;
 	}
 	else if (pos > size - 1) {
 		throw ListErr("Incorrect pos");
@@ -825,21 +854,6 @@ void binaryTree::push(point item)
 	}
 }
 
-void binaryTree::push(point item, long long number)
-{
-	if (number > 0) {
-		if (!root) {
-			last_push(item, number, root, nullptr);
-		}
-		else {
-			push(item, number, root);
-		}
-	}
-	else {
-		throw ListErr("Incorrect number");
-	}
-}
-
 void binaryTree::push_random(long long number)
 {
 	for (long long i = 0; i < number; i++) {
@@ -850,7 +864,7 @@ void binaryTree::push_random(long long number)
 void binaryTree::show(size_t pos)
 {
 	if (size == 0) {
-		throw ListErr("Empty list");
+		std::cout<<"Empty list"<<std::endl;
 	}
 	else if (pos > size - 1) {
 		throw ListErr("Incorrect pos");
@@ -869,7 +883,7 @@ point binaryTree::operator[](size_t index)
 	if (size == 0) {
 		throw ListErr("Empty list");
 	}
-	if (index > size - 1) {
+	else if (index > size - 1) {
 		throw ListErr("Incorrect index");
 	}
 	else {
@@ -888,7 +902,7 @@ node_abstraction binaryTree::value_search(point value)
 	}
 	else {
 		long long counter = 0;
-		int index = value_search(value, counter, root) - 1;
+		long long index = value_search(value, counter, root);
 		return { value, index };
 	}
 }
@@ -930,6 +944,7 @@ long long binaryTree::value_search(point value, long long& counter, binaryNode* 
 		}
 		else {
 			counter++;
+			value_search(value, counter, node->left);
 			return value_search(value, counter, node->right);
 		}
 	}
@@ -964,7 +979,6 @@ void binaryTree::push(point value, binaryNode* node)
 			}
 			else {
 				node->left = new binaryNode(value);
-				node->left->parent = node;
 				size++;
 			}
 		}
@@ -974,220 +988,17 @@ void binaryTree::push(point value, binaryNode* node)
 			}
 			else {
 				node->right = new binaryNode(value);
-				node->right->parent = node;
 				size++;
 			}
 		}
 	}
 }
 
-void binaryTree::push(point value, long long number, binaryNode*& node)
-{
-	if (node) {
-		if (number > 0) {
-			if (value < node->item) {
-				if (node->left) {
-					push(value, node->left);
-				}
-				else {
-					last_push(value, number, node->left, node);
-				}
-			}
-			else {
-				if (node->right) {
-					push(value, node->right);
-				}
-				else {
-					last_push(value, number, node->right, node);
-				}
-			}
-		}
-		else {
-			throw ListErr("Incorrect number");
-		}
-	}
-}
-
-void binaryTree::last_push(point value, long long number, binaryNode*& node, binaryNode* parent)
-{
-	if (number < 0) {
-		throw ListErr("Incorrect number");
-	}
-	else if (number == 0) {
-		return;
-	}
-	else {
-		node = new binaryNode(value);
-		node->parent = parent;
-		last_push(value, number - 1, node->right, node);
-		size++;
-	}
-}
-
-void binaryTree::last_push(point value, long long number, binaryNode*& node, binaryNode* left, binaryNode* right, binaryNode* parent)
-{
-	node = new binaryNode(value);
-	node->parent = parent;
-	last_push(value, number - 1, node->right, node);
-	size++;
-	number--;
-	if (number == 0) {
-		node->left = left;
-		node->right = right;
-		return;
-	}
-	else {
-		last_push(value, number, node->right, left, right, node);
-	}
-}
-
-bool binaryTree::erase(size_t pos, long long& counter, binaryNode*& node)
-{
-	if (node) {
-		if (erase(pos, counter, node->left) == false) {
-			if (counter == pos) {
-				if (node->right == nullptr && node->left) {
-					binaryNode* help = node->left;
-					if (node->parent) {
-						if (node->parent->left == node) {
-							node->parent->left = help;
-							help->parent = node->parent;
-						}
-						else if (node->parent->right == node) {
-							node->parent->right = help;
-							help->parent = node->parent;
-						}
-					}
-					delete node;
-					node = help;
-				}
-				else if (node->right == nullptr) {
-					if (node->parent->left == node) {
-						node->parent->left = nullptr;
-					}
-					else if (node->parent->right == node) {
-						node->parent->right = nullptr;
-					}
-					delete node;
-				}
-				else if (node->right && node->right->left == nullptr) {
-					binaryNode* help1 = node->left;
-					binaryNode* help2 = node->right;
-					if (node->parent) {
-						if (node->parent->left == node) {
-							node->parent->left = help2;
-							help2->parent = node->parent;
-						}
-						else if (node->parent->right == node) {
-							node->parent->right = help2;
-							help2->parent = node->parent;
-						}
-					}
-					delete node;
-					node = help2;
-					node->left = help1;
-					help1->parent = node;
-				}
-				else {
-					binaryNode* search = node->right->left;
-					while (search->left) {
-						search = search->left;
-					}
-					node->item = search->item;
-					search->parent->left = nullptr;
-					delete search;
-				}
-				size--;
-				return true;
-			}
-			else {
-				counter++;
-			}
-			if (erase(pos, counter, node->right) == true) {
-				return true;
-			}
-		}
-		else {
-			return true;
-		}
-	}
-}
-
-void binaryTree::erase(point value, binaryNode*& node)
-{
-	if (node) {
-		if (value < node->item) {
-			erase(value, node->left);
-		}
-		if (value == node->item) {
-			if (node->right == nullptr && node->left) {
-				binaryNode* help = node->left;
-				if (node->parent) {
-					if (node->parent->left == node) {
-						node->parent->left = help;
-						help->parent = node->parent;
-					}
-					else if (node->parent->right == node) {
-						node->parent->right = help;
-						help->parent = node->parent;
-					}
-				}
-				delete node;
-				node = help;
-			}
-			else if (node->right == nullptr) {
-				if (node->parent->left == node) {
-					node->parent->left = nullptr;
-				}
-				else if (node->parent->right == node) {
-					node->parent->right = nullptr;
-				}
-				delete node;
-			}
-			else if (node->right && node->right->left == nullptr) {
-				binaryNode* help1 = node->left;
-				binaryNode* help2 = node->right;
-				if (node->parent) {
-					if (node->parent->left == node) {
-						node->parent->left = help2;
-						help2->parent = node->parent;
-					}
-					else if (node->parent->right == node) {
-						node->parent->right = help2;
-						help2->parent = node->parent;
-					}
-				}
-				delete node;
-				node = help2;
-				node->left = help1;
-				help1->parent = node;
-			}
-			else {
-				binaryNode* search = node->right->left;
-				while (search->left) {
-					search = search->left;
-				}
-				node->item = search->item;
-				search->parent->left = nullptr;
-				delete search;
-			}
-			size--;
-		}
-		if (value >= node->item) {
-			erase(value, node->right);
-		}
-	}
-}
-
 void binaryTree::delete_subtree(binaryNode*& node)
 {
-	if (node) {
-		if (node->left) {
-			delete_subtree(node->left);
-		}
-		if (node->right) {
-			delete_subtree(node->right);
-		}
+	if (node != nullptr) {
+		delete_subtree(node->left);
+		delete_subtree(node->right);
 		delete node;
 		node = nullptr;
 	}
@@ -1200,7 +1011,7 @@ void binaryTree::show(binaryNode* node)
 			show(node->left);
 		}
 		std::cout << node->item;
-		std::cout << ' ';
+		std::cout << std::endl;
 		if (node->right) {
 			show(node->right);
 		}
@@ -1228,8 +1039,8 @@ void AVL_tree::push(point item)
 		size = 1;
 	}
 	else {
-		push(item, root);
-		balance(root);
+		root = push(item, root);
+		root = balance(root);
 	}
 }
 
@@ -1267,7 +1078,7 @@ point AVL_tree::operator[](size_t index)
 	if (size == 0) {
 		throw ListErr("Empty list");
 	}
-	if (index > size - 1) {
+	else if (index > size - 1) {
 		throw ListErr("Incorrect index");
 	}
 	else {
@@ -1275,6 +1086,9 @@ point AVL_tree::operator[](size_t index)
 		Node* to_return = get_node(index, counter, root);
 		if (to_return) {
 			return to_return->item;
+		}
+		else {
+			throw ListErr("Nothing");
 		}
 	}
 }
@@ -1286,7 +1100,7 @@ node_abstraction AVL_tree::value_search(point value)
 	}
 	else {
 		long long counter = 0;
-		int index = value_search(value, counter, root) - 1;
+		long long index = value_search(value, counter, root);
 		return { value, index };
 	}
 }
@@ -1327,6 +1141,7 @@ long long AVL_tree::value_search(point value, long long& counter, Node* node)
 		}
 		else {
 			counter++;
+			value_search(value, counter, node->left);
 			return value_search(value, counter, node->right);
 		}
 	}
@@ -1371,78 +1186,6 @@ void AVL_tree::delete_subtree(Node*& node)
 	}
 }
 
-bool AVL_tree::erase(size_t pos, long long& counter, Node*& node)
-{
-	if (node) {
-		if (erase(pos, counter, node->left) == false) {
-			if (counter == pos) {
-				if (node->right == nullptr && node->left) {
-					Node* help = node->left;
-					if (node->parent) {
-						if (node->parent->left == node) {
-							node->parent->left = help;
-							help->parent = node->parent;
-						}
-						else if (node->parent->right == node) {
-							node->parent->right = help;
-							help->parent = node->parent;
-						}
-					}
-					delete node;
-					node = help;
-				}
-				else if (node->right == nullptr) {
-					if (node->parent->left == node) {
-						node->parent->left = nullptr;
-					}
-					else if (node->parent->right == node) {
-						node->parent->right = nullptr;
-					}
-					delete node;
-				}
-				else if (node->right && node->right->left == nullptr) {
-					Node* help1 = node->left;
-					Node* help2 = node->right;
-					if (node->parent) {
-						if (node->parent->left == node) {
-							node->parent->left = help2;
-							help2->parent = node->parent;
-						}
-						else if (node->parent->right == node) {
-							node->parent->right = help2;
-							help2->parent = node->parent;
-						}
-					}
-					delete node;
-					node = help2;
-					node->left = help1;
-					help1->parent = node;
-				}
-				else {
-					Node* search = node->right->left;
-					while (search->left) {
-						search = search->left;
-					}
-					node->item = search->item;
-					search->parent->left = nullptr;
-					delete search;
-				}
-				size--;
-				return true;
-			}
-			else {
-				counter++;
-			}
-			if (erase(pos, counter, node->right) == true) {
-				return true;
-			}
-		}
-		else {
-			return true;
-		}
-	}
-}
-
 void AVL_tree::show(Node* node)
 {
 	if (node) {
@@ -1450,7 +1193,7 @@ void AVL_tree::show(Node* node)
 			show(node->left);
 		}
 		std::cout << node->item;
-		std::cout << ' ';
+		std::cout << std::endl;
 		if (node->right) {
 			show(node->right);
 		}
@@ -1511,46 +1254,45 @@ std::vector<point> Tree_2_3::range_search_values(point down, point top)
 
 void Tree_2_3::range_search_values(point down, point top, std::vector<point>& to_return, Node* node)
 {
-	if (down < top) {
-		if (node) {
-			if (node->size == 1) {
-				if (down < node->key[0] && node->key[0] < top) {
-					to_return.push_back(node->key[0]);
-					range_search_values(down, top, to_return, node->first);
-					range_search_values(down, top, to_return, node->second);
-				}
-				else if (node->key[0] < down) {
-					range_search_values(down, top, to_return, node->second);
-				}
-				else if (node->key[0] > top) {
-					range_search_values(down, top, to_return, node->first);
-				}
+	if (node) {
+		if (node->size == 1) {
+			if (down < node->key[0] && node->key[0] < top) {
+				to_return.push_back(node->key[0]);
+				range_search_values(down, top, to_return, node->first);
+				range_search_values(down, top, to_return, node->second);
 			}
-			else if (node->size == 2) {
-				if (down < node->key[0] && node->key[0] < top) {
-					to_return.push_back(node->key[0]);
-					range_search_values(down, top, to_return, node->first);
-					range_search_values(down, top, to_return, node->second);
-				}
-				else if (down < node->key[1] && node->key[1] < top) {
-					to_return.push_back(node->key[1]);
-					range_search_values(down, top, to_return, node->second);
-					range_search_values(down, top, to_return, node->third);
-				}
-				else if (node->key[0] > top) {
-					range_search_values(down, top, to_return, node->first);
-				}
-				else if (node->key[1] < down) {
-					range_search_values(down, top, to_return, node->third);
-				}
-				else if (node->key[0] < down || node->key[1] > top) {
-					range_search_values(down, top, to_return, node->second);
-				}
+			else if (node->key[0] < down) {
+				range_search_values(down, top, to_return, node->second);
+			}
+			else if (node->key[0] > top) {
+				range_search_values(down, top, to_return, node->first);
 			}
 		}
-	}
-	else {
-		throw ListErr("Incorrect down and top");
+		else if (node->size == 2) {
+			if (down < node->key[0] && node->key[0] < top) {
+				to_return.push_back(node->key[0]);
+				range_search_values(down, top, to_return, node->first);
+				range_search_values(down, top, to_return, node->second);
+				if (node->key[1] < top) {
+					to_return.push_back(node->key[1]);
+					range_search_values(down, top, to_return, node->third);
+				}
+			}
+			else if (down < node->key[1] && node->key[1] < top) {
+				to_return.push_back(node->key[1]);
+				range_search_values(down, top, to_return, node->second);
+				range_search_values(down, top, to_return, node->third);
+			}
+			else if (node->key[0] > top) {
+				range_search_values(down, top, to_return, node->first);
+			}
+			else if (node->key[1] < down) {
+				range_search_values(down, top, to_return, node->third);
+			}
+			else if (node->key[0] < down && node->key[1] > top) {
+				range_search_values(down, top, to_return, node->second);
+			}
+		}
 	}
 }
 
@@ -1626,7 +1368,1028 @@ void demomode()
 
 void benchmark()
 {
-
+	std::ofstream benchm("benchmark.txt");
+	{benchm << "Linked list.\nCount\tsizeof\tpush random (count/100)\tpop back (count/100)\tpop front (count/100)\tpush 1(count/100 times)\tpush number (count/100, 1 time)\terase (count/100)\terase pos (count/100)\terase pos1 pos2\tis value (count/100)\tvalue search (count/100)\trange search values\trange search nodes\taction\n";
+	clock_t start;
+	clock_t finish;
+	orderedListLinkedList structure;
+	structure.push_random(100);
+	double Time = 0;
+	long long count = 100;
+	while (Time < 1 && count < 100001) {
+		structure.push_random(count * 8.9);
+		start = clock();
+		structure.push_random(count * 0.1);
+		finish = clock();
+		count *= 10;
+		benchm << count << "\t";
+		benchm << count * (sizeof(point) + 2 * sizeof(point*));
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_back();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_front();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.push(point(count / 2), count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(mersenne() % (count * 9 / 10));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		size_t num = mersenne() % (count * 9 / 10);
+		structure.erase(num, num + count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		node_abstraction a({ 0,0,0 }, 0);
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			a = structure.value_search(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point b(count / 2);
+		std::vector<node_abstraction>bb = structure.range_search_nodes(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	while (Time < 10 && count < 500001) {
+		structure.push_random(count * 0.48);
+		start = clock();
+		structure.push_random(count * 0.02);
+		finish = clock();
+		count *= 2;
+		benchm << count << "\t";
+		benchm << count * (sizeof(point) + 2 * sizeof(point*));
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_back();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_front();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.push(point(count / 2), count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(mersenne() % (count * 9 / 10));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		size_t num = mersenne() % (count * 9 / 10);
+		structure.erase(num, num + count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		node_abstraction a({ 0,0,0 }, 0);
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			a = structure.value_search(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point b(count / 2);
+		std::vector<node_abstraction>bb = structure.range_search_nodes(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	}
+	{
+	benchm << "Array list.\nCount\tsizeof\tpush random (count/100)\tquick push (count/100 times)\tquick push (1 time, count/100)\tpop back (count/100)\tpop front (count/100)\tpush 1(count/100 times)\tpush number (count/100, 1 time)\terase (count/100)\terase pos (count/100)\terase pos1 pos2\tis value (count/100)\tvalue search (count/100)\trange search values\trange search nodes\taction\n";
+	orderedListArrayList structure(1100000);
+	structure.push_random(100);
+	clock_t start;
+	clock_t finish;
+	double Time = 0;
+	long long count = 100;
+	while (Time < 1 && count < 100001) {
+		structure.push_random(count * 8.7);
+		start = clock();
+		structure.push_random(count * 0.1);
+		finish = clock();
+		count *= 10;
+		benchm << count << "\t";
+		benchm << count * sizeof(point);
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.quick_push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.quick_push(point(count / 2), count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_back();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_front();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.push(point(count / 2), count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(mersenne() % (count * 9 / 10));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		size_t num = mersenne() % (count * 9 / 10);
+		structure.erase(num, num + count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		node_abstraction a({ 0,0,0 }, 0);
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			a = structure.value_search(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point b(count / 2);
+		std::vector<node_abstraction>bb = structure.range_search_nodes(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	while (Time < 10 && count < 500001) {
+		structure.push_random(count * 0.44);
+		start = clock();
+		structure.push_random(count * 0.02);
+		finish = clock();
+		count *= 2;
+		benchm << count << "\t";
+		benchm << count * sizeof(point);
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.quick_push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.quick_push(point(count / 2), count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_back();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.pop_front();
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.push(point(count / 2), count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(mersenne() % (count * 9 / 10));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		size_t num = mersenne() % (count * 9 / 10);
+		structure.erase(num, num + count / 100);
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		node_abstraction a({ 0,0,0 }, 0);
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			a = structure.value_search(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point b(count / 2);
+		std::vector<node_abstraction>bb = structure.range_search_nodes(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	}
+	{
+		benchm << "Binary tree.\nCount\tsizeof\tpush random (count/100)\tpush 1(count/100 times)\terase (count/100)\tis value (count/100)\tvalue search (count/100)\trange search values\taction\n";
+		clock_t start;
+		clock_t finish;
+		binaryTree structure;
+		structure.push_random(100);
+		double Time = 0;
+		long long count = 100;
+		while (Time < 1 && count < 100001) {
+			structure.push_random(count * 8.9-(structure.length()-count));
+			start = clock();
+			structure.push_random(count * 0.1);
+			finish = clock();
+			count *= 10;
+			benchm << count << "\t";
+			benchm << count * (sizeof(point) + 2 * sizeof(point*));
+			if (count < 1000000) {
+				benchm << "\t\t\t";
+			}
+			else {
+				benchm << "\t\t";
+			}
+			benchm << finish - start << "\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				structure.push(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				structure.erase(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if (count > structure.length()) {
+				structure.push_random(count - structure.length());
+			}
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				structure.is_value(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			node_abstraction a({ 0,0,0 }, 0);
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				a = structure.value_search(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			point aaa(count / 2);
+			std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			structure.action(x_plus);
+			finish = clock();
+			benchm << finish - start << "\n";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+		}
+		while (Time < 10 && count < 500001) {
+			structure.push_random(count * 0.48 - (structure.length()-count));
+			start = clock();
+			structure.push_random(count * 0.02);
+			finish = clock();
+			count *= 2;
+			benchm << count << "\t";
+			benchm << count * (sizeof(point) + 2 * sizeof(point*));
+			if (count < 1000000) {
+				benchm << "\t\t\t";
+			}
+			else {
+				benchm << "\t\t";
+			}
+			benchm << finish - start << "\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				structure.push(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				structure.erase(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if (count > structure.length()) {
+				structure.push_random(count - structure.length());
+			}
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				structure.is_value(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			node_abstraction a({ 0,0,0 }, 0);
+			start = clock();
+			for (long long i = 0; i < count / 100; i++) {
+				a = structure.value_search(point(count / 2));
+			}
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			point aaa(count / 2);
+			std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+			finish = clock();
+			benchm << finish - start << "\t\t\t";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+			start = clock();
+			structure.action(x_plus);
+			finish = clock();
+			benchm << finish - start << "\n";
+			if ((finish - start) / CLOCKS_PER_SEC > Time) {
+				Time = (finish - start) / CLOCKS_PER_SEC;
+			}
+		}
+	}
+	{
+	benchm << "AVL tree.\nCount\tsizeof\tpush random (count/100)\tpush 1(count/100 times)\terase (count/100)\tis value (count/100)\tvalue search (count/100)\trange search values\taction\n";
+	clock_t start;
+	clock_t finish;
+	AVL_tree structure;
+	structure.push_random(100);
+	double Time = 0;
+	long long count = 100;
+	while (Time < 1 && count < 100001) {
+		structure.push_random(count * 8.9 - (structure.length() - count));
+		start = clock();
+		structure.push_random(count * 0.1);
+		finish = clock();
+		count *= 10;
+		benchm << count << "\t";
+		benchm << count * (sizeof(point) + 2 * sizeof(point*));
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		node_abstraction a({ 0,0,0 }, 0);
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			a = structure.value_search(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	while (Time < 10 && count < 500001) {
+		structure.push_random(count * 0.48 - (structure.length() - count));
+		start = clock();
+		structure.push_random(count * 0.02);
+		finish = clock();
+		count *= 2;
+		benchm << count << "\t";
+		benchm << count * (sizeof(point) + 2 * sizeof(point*));
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		node_abstraction a({ 0,0,0 }, 0);
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			a = structure.value_search(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	}
+	{
+	benchm << "2-3 tree.\nCount\tsizeof\tpush random (count/100)\tpush 1(count/100 times)\terase (count/100)\tis value (count/100)\trange search values\taction\n";
+	clock_t start;
+	clock_t finish;
+	Tree_2_3 structure;
+	structure.push_random(100);
+	double Time = 0;
+	long long count = 100;
+	while (Time < 1 && count < 100001) {
+		structure.push_random(count * 8.9 - (structure.length() - count));
+		start = clock();
+		structure.push_random(count * 0.1);
+		finish = clock();
+		count *= 10;
+		benchm << count << "\t";
+		benchm << count * (sizeof(point) + 2 * sizeof(point*));
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	while (Time < 10 && count < 500001) {
+		structure.push_random(count * 0.48 - (structure.length() - count));
+		start = clock();
+		structure.push_random(count * 0.02);
+		finish = clock();
+		count *= 2;
+		benchm << count << "\t";
+		benchm << count * (sizeof(point) + 2 * sizeof(point*));
+		if (count < 1000000) {
+			benchm << "\t\t\t";
+		}
+		else {
+			benchm << "\t\t";
+		}
+		benchm << finish - start << "\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.push(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.erase(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if (count > structure.length()) {
+			structure.push_random(count - structure.length());
+		}
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		for (long long i = 0; i < count / 100; i++) {
+			structure.is_value(point(count / 2));
+		}
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		point aaa(count / 2);
+		std::vector<point>aa = structure.range_search_values(aaa, { aaa.x + count / 100,aaa.y,aaa.z });
+		finish = clock();
+		benchm << finish - start << "\t\t\t";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+		start = clock();
+		structure.action(x_plus);
+		finish = clock();
+		benchm << finish - start << "\n";
+		if ((finish - start) / CLOCKS_PER_SEC > Time) {
+			Time = (finish - start) / CLOCKS_PER_SEC;
+		}
+	}
+	}
+	benchm.close();
 }
 
 void commands() {
@@ -2002,7 +2765,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "values") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "values") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -2038,7 +2801,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "nodes") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "nodes") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -2089,7 +2852,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "y") {
+					else if (all_commands[1] == "y") {
 						if (all_commands[2] == "plus") {
 							structure.action(y_plus);
 						}
@@ -2100,7 +2863,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "z") {
+					else if (all_commands[1] == "z") {
 						if (all_commands[2] == "plus") {
 							structure.action(z_plus);
 						}
@@ -2227,7 +2990,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 5 && all_commands[1] == "quick" && all_commands[1] == "push") {
+			else if (all_commands.size() == 5 && all_commands[0] == "quick" && all_commands[1] == "push") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 2; i < all_commands.size(); i++) {
@@ -2256,7 +3019,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 5 && all_commands[0] == "quick" && all_commands[1] == "push") {
+			else if (all_commands.size() == 6 && all_commands[0] == "quick" && all_commands[1] == "push") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 2; i < all_commands.size() - 1; i++) {
@@ -2270,7 +3033,7 @@ void commands(int what_structure, long long number = -1)
 						break;
 					}
 				}
-				std::stringstream ss(all_commands[4]);
+				std::stringstream ss(all_commands[5]);
 				long long a;
 				if (!(ss >> a)) {
 					correct = false;
@@ -2408,6 +3171,7 @@ void commands(int what_structure, long long number = -1)
 					try
 					{
 						structure.show(a);
+						std::cout<< std::endl;
 					}
 					catch (const std::exception& ex)
 					{
@@ -2485,7 +3249,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "values") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "values") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -2521,7 +3285,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "nodes") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "nodes") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -2572,7 +3336,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "y") {
+					else if (all_commands[1] == "y") {
 						if (all_commands[2] == "plus") {
 							structure.action(y_plus);
 						}
@@ -2583,7 +3347,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "z") {
+					else if (all_commands[1] == "z") {
 						if (all_commands[2] == "plus") {
 							structure.action(z_plus);
 						}
@@ -2645,40 +3409,6 @@ void commands(int what_structure, long long number = -1)
 					try
 					{
 						structure.push(point(arguments[0], arguments[1], arguments[2]));
-						std::cout << "Successfully added" << std::endl;
-					}
-					catch (const std::exception& ex)
-					{
-						std::cout << ex.what() << std::endl;
-					}
-				}
-				else {
-					std::cout << "Incorrect argument. help for reference" << std::endl;
-				}
-			}
-			else if (all_commands.size() == 5 && all_commands[0] == "push") {
-				std::vector<double>arguments;
-				bool correct = true;
-				for (size_t i = 1; i < all_commands.size() - 1; i++) {
-					std::stringstream ss(all_commands[i]);
-					double a;
-					if (ss >> a) {
-						arguments.push_back(a);
-					}
-					else {
-						correct = false;
-						break;
-					}
-				}
-				std::stringstream ss(all_commands[4]);
-				long long a;
-				if (!(ss >> a)) {
-					correct = false;
-				}
-				if (correct && a > 0) {
-					try
-					{
-						structure.push(point(arguments[0], arguments[1], arguments[2]), a);
 						std::cout << "Successfully added" << std::endl;
 					}
 					catch (const std::exception& ex)
@@ -2761,32 +3491,6 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 3 && all_commands[0] == "erase") {
-				std::stringstream ss1(all_commands[1]);
-				bool correct = true;
-				long long a;
-				if (!(ss1 >> a)) {
-					correct = false;
-				}
-				std::stringstream ss2(all_commands[2]);
-				long long b;
-				if (!(ss2 >> b)) {
-					correct = false;
-				}
-				if (correct && a > -1 && b > -1) {
-					try
-					{
-						structure.erase(a, b);
-					}
-					catch (const std::exception& ex)
-					{
-						std::cout << ex.what() << std::endl;
-					}
-				}
-				else {
-					std::cout << "Incorrect argument. help for reference" << std::endl;
-				}
-			}
 			else if (all_commands.size() == 1 && all_commands[0] == "show") {
 				try
 				{
@@ -2808,6 +3512,7 @@ void commands(int what_structure, long long number = -1)
 					try
 					{
 						structure.show(a);
+						std::cout << std::endl;
 					}
 					catch (const std::exception& ex)
 					{
@@ -2869,7 +3574,7 @@ void commands(int what_structure, long long number = -1)
 					try
 					{
 						node_abstraction node = structure.value_search(point(arguments[0], arguments[1], arguments[2]));
-						if (node.position == -1) {
+						if (node.position < 0) {
 							std::cout << "This value isn't here" << std::endl;
 						}
 						else {
@@ -2885,7 +3590,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "values") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "values") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -2936,7 +3641,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "y") {
+					else if (all_commands[1] == "y") {
 						if (all_commands[2] == "plus") {
 							structure.action(y_plus);
 						}
@@ -2947,7 +3652,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "z") {
+					else if (all_commands[1] == "z") {
 						if (all_commands[2] == "plus") {
 							structure.action(z_plus);
 						}
@@ -3112,6 +3817,7 @@ void commands(int what_structure, long long number = -1)
 					try
 					{
 						structure.show(a);
+						std::cout << std::endl;
 					}
 					catch (const std::exception& ex)
 					{
@@ -3189,7 +3895,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "values") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "values") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -3240,7 +3946,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "y") {
+					else if (all_commands[1] == "y") {
 						if (all_commands[2] == "plus") {
 							structure.action(y_plus);
 						}
@@ -3251,7 +3957,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "z") {
+					else if (all_commands[1] == "z") {
 						if (all_commands[2] == "plus") {
 							structure.action(z_plus);
 						}
@@ -3405,27 +4111,6 @@ void commands(int what_structure, long long number = -1)
 					std::cout << ex.what() << std::endl;
 				}
 			}
-			/*else if (all_commands.size() == 2 && all_commands[0] == "show") {
-				std::stringstream ss(all_commands[1]);
-				bool correct = false;
-				long long a;
-				if (ss >> a) {
-					correct = true;
-				}
-				if (correct && a > -1) {
-					try
-					{
-						structure.show(a);
-					}
-					catch (const std::exception& ex)
-					{
-						std::cout << ex.what() << std::endl;
-					}
-				}
-				else {
-					std::cout << "Incorrect argument. help for reference" << std::endl;
-				}
-			}*/
 			else if (all_commands.size() == 5 && all_commands[0] == "is" && all_commands[1] == "value") {
 				std::vector<double>arguments;
 				bool correct = true;
@@ -3459,41 +4144,7 @@ void commands(int what_structure, long long number = -1)
 					std::cout << "Incorrect argument. help for reference" << std::endl;
 				}
 			}
-			/*else if (all_commands.size() == 5 && all_commands[0] == "value" && all_commands[1] == "search") {
-				std::vector<double>arguments;
-				bool correct = true;
-				for (size_t i = 2; i < all_commands.size(); i++) {
-					std::stringstream ss(all_commands[i]);
-					double a;
-					if (ss >> a) {
-						arguments.push_back(a);
-					}
-					else {
-						correct = false;
-						break;
-					}
-				}
-				if (correct) {
-					try
-					{
-						node_abstraction node = structure.value_search(point(arguments[0], arguments[1], arguments[2]));
-						if (node.position == -1) {
-							std::cout << "This value isn't here" << std::endl;
-						}
-						else {
-							std::cout << "Position of that value: " << node.position << std::endl;
-						}
-					}
-					catch (const std::exception& ex)
-					{
-						std::cout << ex.what() << std::endl;
-					}
-				}
-				else {
-					std::cout << "Incorrect argument. help for reference" << std::endl;
-				}
-			}*/
-			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[1] == "values") {
+			else if (all_commands.size() == 9 && all_commands[0] == "range" && all_commands[1] == "search" && all_commands[2] == "values") {
 				std::vector<double>arguments;
 				bool correct = true;
 				for (size_t i = 3; i < all_commands.size(); i++) {
@@ -3544,7 +4195,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "y") {
+					else if (all_commands[1] == "y") {
 						if (all_commands[2] == "plus") {
 							structure.action(y_plus);
 						}
@@ -3555,7 +4206,7 @@ void commands(int what_structure, long long number = -1)
 							correct = false;
 						}
 					}
-					if (all_commands[1] == "z") {
+					else if (all_commands[1] == "z") {
 						if (all_commands[2] == "plus") {
 							structure.action(z_plus);
 						}
