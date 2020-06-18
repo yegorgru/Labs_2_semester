@@ -2,12 +2,8 @@
 
 extern std::mt19937 mersenne;
 
-
-
-
-Bot::Bot(int energy,int max_energy,int number_of_gens_of_action,int min_energy_for_division){
+Bot::Bot(int energy,int number_of_gens_of_action,int min_energy_for_division){
     this->energy=energy;
-    this->max_energy=max_energy;
     this->number_of_gens_of_action=number_of_gens_of_action;
     this->min_energy_for_division=min_energy_for_division;
     posX = -1;
@@ -15,7 +11,7 @@ Bot::Bot(int energy,int max_energy,int number_of_gens_of_action,int min_energy_f
     counter = 0;
     view = mersenne()%8;
     alive = true;
-    condition_for_attack=mersenne()%(max_energy/2+1);
+    condition_for_attack=mersenne()%(energy+1);
     chance_of_mutation=10;
     irritation=10;
     color=1+mersenne()%6;
@@ -54,7 +50,6 @@ Bot::Bot(const Bot& another){
     this->energy=another.energy;
 
     //changeless
-    this->max_energy=another.max_energy;
     this->counter=0;
     this->posX=another.posX;
     this->posY=another.posY;
@@ -94,22 +89,10 @@ Bot::Bot(const Bot& another){
             }
         }
         else if(what_mutation==1){
-           min_energy_for_division*=((double(mersenne()%20))/10);
-           if(min_energy_for_division>max_energy-1){
-               min_energy_for_division=max_energy-1;
-           }
-           else if(min_energy_for_division<1){
-               min_energy_for_division=1;
-           }
+           min_energy_for_division*=((double(mersenne()%20+1))/10);
         }
         else if(what_mutation==2){
-            condition_for_attack*=((double(mersenne()%20))/10);
-            if(condition_for_attack>max_energy-1){
-                condition_for_attack=max_energy-1;
-            }
-            else if(condition_for_attack<1){
-                condition_for_attack=1;
-            }
+            condition_for_attack*=((double(mersenne()%20+1))/10);
         }
         else if(what_mutation==3){
             color=1+mersenne()%6;
@@ -134,10 +117,10 @@ Bot::Bot(const Bot& another){
             else{
                 what_mutation-=56;
                 if(what_mutation%7==6){
-                    gens_of_action[what_mutation/number_of_gens_of_action][6]=mersenne()% 9;
+                    gens_of_action[what_mutation/7][6]=mersenne()% 9;
                 }
-                else{
-                    gens_of_action[what_mutation/number_of_gens_of_action][what_mutation%7]=mersenne()% 10;
+                else {
+                    gens_of_action[what_mutation/7][what_mutation%7]=mersenne()% 10;
                 }
             }
         }

@@ -12,20 +12,18 @@ WorldParameters::WorldParameters(QWidget *parent) :
     name="";
     number_of_live_cells=0;
     initial_live_cell_energy=0;
-    max_live_cell_energy=0;
     number_of_gens_of_action=0;
     min_energy_for_division=0;
     number_of_plants=0;
     plants_energy=0;
     meat_energy=0;
-    max_age=0;
 
     QIntValidator *validator1 = new QIntValidator(1,2000,this);
     ui->Number_of_live_cells->setValidator(validator1);
     QIntValidator *validator2 = new QIntValidator(1,1000,this);
     ui->Initial_live_cell_energy->setValidator(validator2);
     ui->Max_live_cell_energy->setValidator(validator2);
-    QIntValidator *validator3 = new QIntValidator(1,46,this);
+    QIntValidator *validator3 = new QIntValidator(2,10,this);
     ui->Number_of_gens_of_action->setValidator(validator3);
     QIntValidator *validator4 = new QIntValidator(1,600,this);
     ui->Min_energy_for_division->setValidator(validator4);
@@ -34,8 +32,6 @@ WorldParameters::WorldParameters(QWidget *parent) :
     ui->Plants_energy->setValidator(validator6);
     QIntValidator *validator7 = new QIntValidator(1,300,this);
     ui->Meat_energy->setValidator(validator7);
-    QIntValidator *validator8 = new QIntValidator(1,10000,this);
-    ui->Max_age->setValidator(validator8);
 }
 
 WorldParameters::~WorldParameters()
@@ -139,18 +135,6 @@ void WorldParameters::on_Meat_energy_textChanged(const QString &arg1)
     }
 }
 
-void WorldParameters::on_Max_age_textChanged(const QString &arg1)
-{
-    bool enabled = ui->Max_age->hasAcceptableInput();
-    ui->Start->setEnabled(enabled);
-    if(!enabled){
-        ui->Max_age->setStyleSheet("color: white;  background-color: red");
-    }
-    else{
-        ui->Max_age->setStyleSheet("color: black;  background-color: white");
-    }
-}
-
 void WorldParameters::on_Start_clicked()
 {
     this->correct=true;
@@ -158,13 +142,27 @@ void WorldParameters::on_Start_clicked()
     this->name=ui->Name->text();
     this->number_of_live_cells=ui->Number_of_live_cells->text().toInt();
     this->initial_live_cell_energy=ui->Initial_live_cell_energy->text().toInt();
-    this->max_live_cell_energy=ui->Max_live_cell_energy->text().toInt();
     this->number_of_gens_of_action=ui->Number_of_gens_of_action->text().toInt();
     this->min_energy_for_division=ui->Min_energy_for_division->text().toInt();
     this->number_of_plants=ui->Number_of_plants->text().toInt();
     this->plants_energy=ui->Plants_energy->text().toInt();
     this->meat_energy=ui->Meat_energy->text().toInt();
-    this->max_age=ui->Max_age->text().toInt();
+    this->speed=ui->Speed->value();
     this->tree_propagation_speed=ui->Tree_propagation_speed->value();
     this->close();
+}
+
+void WorldParameters::on_Name_textChanged(const QString &arg1)
+{
+    bool enabled = false;
+    if(ui->Name->text() != ""){
+        enabled = true;
+    }
+    ui->Start->setEnabled(enabled);
+    if(!enabled){
+        ui->Name->setStyleSheet("color: white;  background-color: red");
+    }
+    else{
+        ui->Name->setStyleSheet("color: black;  background-color: white");
+    }
 }

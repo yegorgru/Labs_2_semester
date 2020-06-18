@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "Bots.h"
+#include "botinfo.h"
 
 #include <iostream>
 #include <ctime>
@@ -22,7 +23,8 @@
 #include <QPixmap>
 #include <QGraphicsPixmapItem>
 #include <QTimer>
-
+#include <QTableWidget>
+#include <QAbstractItemDelegate>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -47,11 +49,15 @@ public:
 private slots:
     void on_pushButton_clicked();
 
-    void on_pushButton_3_clicked();
-
-    void on_pushButton_2_clicked();
-
     void on_play_clicked();
+
+    void on_Meat_energy_textChanged(const QString &arg1);
+
+    void on_Plants_energy_textChanged(const QString &arg1);
+
+    void on_Name_textChanged(const QString &arg1);
+
+    void on_update_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -77,22 +83,32 @@ private:
     QTimer* m_timer;
 
     std::deque<Bot>bots;
-    Bot current_bot=Bot(0,0,0,0);
+    Bot current_bot=Bot(0,0,0);
 
     int number_of_live_cells;
     int initial_live_cell_energy;
-    int max_live_cell_energy;
     int number_of_gens_of_action;
     int min_energy_for_division;
     int number_of_plants;
     int plants_energy;
     int meat_energy;
-    int max_age;
     int tree_propagation_speed;
 
     bool is_action;
-    long long turns;
     int delay;
+    int speed;
+
+    long long turns;
+    long long trees_counter;
+    long long bots_counter;
+
+    long long red_counter;
+    long long blue_counter;
+    long long yellow_counter;
+    long long orange_counter;
+    long long violet_counter;
+    long long green_counter;
+
 
     unsigned short int elements[50][50]={};
     QGraphicsPixmapItem* items[50][50];

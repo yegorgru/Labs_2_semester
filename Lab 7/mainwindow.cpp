@@ -17,15 +17,16 @@ MainWindow::MainWindow(QWidget *parent)
     name="";
     number_of_live_cells=0;
     initial_live_cell_energy=0;
-    max_live_cell_energy=0;
     number_of_gens_of_action=0;
     min_energy_for_division=0;
     number_of_plants=0;
     plants_energy=0;
     meat_energy=0;
-    max_age=0;
     is_action=false;
-    delay=1000;
+    delay=500;
+    turns = 0;
+    bots_counter = 0;
+    trees_counter = 0;
 
     current_bot.alive=false;
 
@@ -46,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
                 elements[i][j]=4;
             }
             items[i][j]->setScale(0.02);
-            //items[i][j]->setFlags(QGraphicsItem::ItemIsSelectable);
+            items[i][j]->setFlags(QGraphicsItem::ItemIsSelectable);
             items[i][j]->setPos(18*i,18*j);
             scene->addItem(items[i][j]);
         }
@@ -110,19 +111,26 @@ MainWindow::MainWindow(QWidget *parent)
     Salad = QPixmap::fromImage(QImage(part_way+"Salad.png"));
     Empty = QPixmap::fromImage(QImage(part_way+"Empty.png"));
 
-
-    //scene=new QGraphicsScene(this);
-
-    //scene->addPixmap(QPixmap::fromImage(image));
-
     ui->graphicsView->setScene(scene);
 
-    //QGraphicsPixmapItem* item = new QGraphicsPixmapItem();
-    //scene->addItem(item);
-    //movie_poster->show();
+    QIntValidator *validator1 = new QIntValidator(1,200,this);
+    ui->Plants_energy->setValidator(validator1);
+    QIntValidator *validator2 = new QIntValidator(1,300,this);
+    ui->Meat_energy->setValidator(validator2);
+
+    red_counter = 0 ;
+    blue_counter = 0 ;
+    yellow_counter = 0 ;
+    orange_counter = 0 ;
+    violet_counter = 0 ;
+    green_counter = 0 ;
+
     ui->play->setVisible(false);
+    ui->update->setVisible(false);
     ui->parameters->setVisible(false);
-    ui->Bot_show->setVisible(false);
+    ui->turns_text->setVisible(false);
+    ui->Turns_counter->setVisible(false);
+    ui->statistic_information->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -133,21 +141,67 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    for(int i=0;i<50;i++){
-        for(int j=0;j<50;j++){
-            //items[i][j]
+    on_play_clicked();
+    bots.clear();
+    turns=0;
+    trees_counter=0;
+    bots_counter=0;
+    yellow_counter=0;
+    blue_counter=0;
+    violet_counter=0;
+    orange_counter=0;
+    green_counter=0;
+    red_counter=0;
+    for(int i=1;i<49;i++){
+        for(int j=1;j<49;j++){
+            elements[i][j]=0;
         }
     }
-
     QMessageBox msgBox;
     msgBox.setText("Create random world?");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Cancel);
     int reply = msgBox.exec();
 
-
     if(reply==QMessageBox::Yes){
-        is_action=true;
+
+            this->name="Random world";
+            this->number_of_live_cells=1+mersenne()%2000;
+            this->initial_live_cell_energy=1+mersenne()%1000;
+            this->number_of_gens_of_action=1+mersenne()%10;
+            this->min_energy_for_division=1+mersenne()%600;
+            this->number_of_plants=1+mersenne()%2000;
+            this->plants_energy=1+mersenne()%200;
+            this->meat_energy=1+mersenne()%300;
+            this->tree_propagation_speed=1+mersenne()%3;;
+            this->speed = 1+mersenne()%10;;
+            this->delay = (11-this->speed)*100;
+
+            this->ui->Name->setText(name);
+            this->ui->Plants_energy->setText(QString::number(plants_energy));
+            this->ui->Meat_energy->setText(QString::number(meat_energy));
+            this->ui->Speed->setValue(this->speed);
+            this->ui->Tree_propagation_speed->setValue(tree_propagation_speed);
+            is_action=true;
+            if(is_action){
+                for(int i=1;i<49;i++){
+                    for(int j=1;j<49;j++){
+                        changed.push_back({i,j});
+                    }
+                }
+                is_action=false;
+                make_start_elements();
+                form_scene();
+                scene->update();
+                ui->graphicsView->update();
+                ui->play->setVisible(true);
+                ui->update->setVisible(true);
+                ui->parameters->setVisible(true);
+                ui->turns_text->setVisible(true);
+                ui->Turns_counter->setVisible(true);
+                ui->statistic_information->setVisible(true);
+            }
+
     }
     else if(reply==QMessageBox::No){
         WorldParameters Parameters;
@@ -159,21 +213,19 @@ void MainWindow::on_pushButton_clicked()
             this->name=Parameters.name;
             this->number_of_live_cells=Parameters.number_of_live_cells;
             this->initial_live_cell_energy=Parameters.initial_live_cell_energy;
-            this->max_live_cell_energy=Parameters.max_live_cell_energy;
             this->number_of_gens_of_action=Parameters.number_of_gens_of_action;
             this->min_energy_for_division=Parameters.min_energy_for_division;
             this->number_of_plants=Parameters.number_of_plants;
             this->plants_energy=Parameters.plants_energy;
             this->meat_energy=Parameters.meat_energy;
-            this->max_age=Parameters.max_age;
             this->tree_propagation_speed=Parameters.tree_propagation_speed;
+            this->speed = Parameters.speed;
+            this->delay = (11-Parameters.speed)*100;
 
             this->ui->Name->setText(name);
-            this->ui->Max_live_cell_energy->setText(QString::number(max_live_cell_energy));
-            this->ui->Min_energy_for_division->setText(QString::number(min_energy_for_division));
             this->ui->Plants_energy->setText(QString::number(plants_energy));
             this->ui->Meat_energy->setText(QString::number(meat_energy));
-            this->ui->Max_age->setText(QString::number(max_age));
+            this->ui->Speed->setValue(Parameters.speed);
             this->ui->Tree_propagation_speed->setValue(tree_propagation_speed);
             is_action=true;
         }
@@ -193,22 +245,13 @@ void MainWindow::on_pushButton_clicked()
             scene->update();
             ui->graphicsView->update();
             ui->play->setVisible(true);
+            ui->update->setVisible(true);
+            ui->parameters->setVisible(true);
+            ui->turns_text->setVisible(true);
+            ui->Turns_counter->setVisible(true);
+            ui->statistic_information->setVisible(true);
         }
     }
-}
-
-void MainWindow::on_pushButton_3_clicked()
-{
-
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-
-}
-
-void MainWindow::action(){
-
 }
 
 void MainWindow::update_scene(){
@@ -228,8 +271,9 @@ void MainWindow::update_scene(){
             int posY=1+mersenne()%49;
             if(elements[posX][posY]==1){
                 elements[posX][posY]=3;
+                trees_counter++;
+                changed.push_back({posX,posY});
             }
-            changed.push_back({posX,posY});
         }
         for(size_t i=0;i<bots.size();i++){
             bool is_cur=false;
@@ -243,8 +287,26 @@ void MainWindow::update_scene(){
                     bots[i].alive=false;
                     elements[bots[i].posX][bots[i].posY]=2;
                     changed.push_back({bots[i].posX,bots[i].posY});
+                    if(bots[i].color == 1){
+                        red_counter--;
+                    }
+                    else if(bots[i].color == 2){
+                        yellow_counter--;
+                    }
+                    else if(bots[i].color == 3){
+                        violet_counter--;
+                    }
+                    else if(bots[i].color == 4){
+                        orange_counter--;
+                    }
+                    else if(bots[i].color == 5){
+                        blue_counter--;
+                    }
+                    else if(bots[i].color == 6){
+                        green_counter--;
+                    }
                     bots.erase(bots.begin()+i);
-                    if(i!=bots.size()-1){
+                    if(i!=bots.size()){
                          i--;
                     }
                 }
@@ -254,11 +316,26 @@ void MainWindow::update_scene(){
                     int what_is_ahead;
                     coordinates ahead=get_ahead(what_is_ahead,bots[i]);
                     if(bots.size()<2000 && bots[i].energy>bots[i].min_energy_for_division-1 && what_is_ahead==1){
+                        bots_counter++;
                         bots[i].energy/=2;
-                        //Bot new_bot(bots[i]);
                         bots.push_back(bots[i]);
-                        if(bots.size()>2000){
-                            std::cout<<"Error"<<bots.size();
+                        if(bots[bots.size()-1].color == 1){
+                            red_counter++;
+                        }
+                        else if(bots[bots.size()-1].color == 2){
+                            yellow_counter++;
+                        }
+                        else if(bots[bots.size()-1].color == 3){
+                            violet_counter++;
+                        }
+                        else if(bots[bots.size()-1].color == 4){
+                            orange_counter++;
+                        }
+                        else if(bots[bots.size()-1].color == 5){
+                            blue_counter++;
+                        }
+                        else if(bots[bots.size()-1].color == 6){
+                            green_counter++;
                         }
                         changed.push_back({bots[i].posX,bots[i].posY});
                         go=true;
@@ -377,7 +454,6 @@ void MainWindow::update_scene(){
                                                     if(bots[j].energy<1 && bots[j].superpower==1 && bots[i].color!=bots[j].color){
                                                         bots[i].energy=0;
                                                     }
-
                                                 }
                                                 else{
                                                     action=attack_fall;
@@ -391,9 +467,6 @@ void MainWindow::update_scene(){
                                         break;
                                     }
                                 }
-                            }
-                            if(bots[i].energy>bots[i].max_energy){
-                                bots[i].energy=bots[i].max_energy;
                             }
                         }
                         if(action==8){
@@ -449,12 +522,45 @@ void MainWindow::update_scene(){
                 }
             }
             else{
-               std::cout<<"Error";
+                elements[bots[i].posX][bots[i].posY]=2;
+                changed.push_back({bots[i].posX,bots[i].posY});
+                if(bots[i].color == 1){
+                    red_counter--;
+                }
+                else if(bots[i].color == 2){
+                    yellow_counter--;
+                }
+                else if(bots[i].color == 3){
+                    violet_counter--;
+                }
+                else if(bots[i].color == 4){
+                    orange_counter--;
+                }
+                else if(bots[i].color == 5){
+                    blue_counter--;
+                }
+                else if(bots[i].color == 6){
+                    green_counter--;
+                }
+                bots.erase(bots.begin()+i);
+                if(i!=bots.size()){
+                     i--;
+                }
             }
             if(is_cur){
                 current_bot=bots[i];
             }
         }
+        turns++;
+        ui->Turns_counter->setText(QString::number(turns));
+        ui->counter_red->setText(QString::number(red_counter));
+        ui->counter_blue->setText(QString::number(blue_counter));
+        ui->counter_orange->setText(QString::number(orange_counter));
+        ui->counter_violet->setText(QString::number(violet_counter));
+        ui->counter_yellow->setText(QString::number(yellow_counter));
+        ui->counter_green->setText(QString::number(green_counter));
+        ui->Tree_counter->setText(QString::number(this->trees_counter));
+        ui->Bots_counter->setText(QString::number(this->bots_counter));
         form_scene();
         scene->update();
         ui->graphicsView->update();
@@ -465,47 +571,23 @@ void MainWindow::form_scene(){
     if(scene->selectedItems().size()>0){
         int x = scene->selectedItems().last()->x()/18;
         int y = scene->selectedItems().last()->y()/18;
-        if(ui->color_value->text()==""||scene->selectedItems().size()>1){
-            for(auto i:bots){
-                if(i.posX==x && i.posY==y){
-                    current_bot=i;
-                    break;
-                }
+        bool was = false;
+        for(auto& i:bots){
+            if(i.posX==x && i.posY==y){
+                current_bot=i;
+                was = true;
+                break;
             }
         }
         for(auto& i:scene->selectedItems()){
             i->setSelected(false);
         }
         scene->selectedItems().clear();
-    }
-    if(current_bot.alive==true){
-        if(current_bot.color==1){
-            ui->color_value->setText("Red");
+        if(was){
+            botInfo info(current_bot);
+            info.setModal(true);
+            info.exec();
         }
-        else if(current_bot.color==2){
-            ui->color_value->setText("Yellow");
-        }
-        else if(current_bot.color==3){
-            ui->color_value->setText("Violet");
-        }
-        else if(current_bot.color==4){
-            ui->color_value->setText("Orange");
-        }
-        else if(current_bot.color==5){
-            ui->color_value->setText("Blue");
-        }
-        else{
-            ui->color_value->setText("Green");
-        }
-        ui->energy_value->setText(QString::number(current_bot.energy));
-        ui->view_value->setText(QString::number(current_bot.view));
-        ui->age_value->setText(QString::number(current_bot.age));
-    }
-    else{
-         ui->color_value->setText("");
-         ui->energy_value->setText("");
-         ui->view_value->setText("");
-         ui->age_value->setText("");
     }
     if(changed.size()>0){
         int i;
@@ -718,26 +800,27 @@ void MainWindow::make_start_elements(){
             }
             else{
 
-                Bot to_add(initial_live_cell_energy,max_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
+                Bot to_add(initial_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
 
-                /*if (bots.size() == 0) {
-                    to_add.id = 0;
+                if(to_add.color == 1){
+                    red_counter++;
                 }
-                else {
-                    std::deque<Bot>for_sorting = bots;
-                    quicksort(for_sorting,0,for_sorting.size()-1);
-                    bool found = false;
-                    for (size_t i = 0; i < for_sorting.size(); i++) {
-                        if (for_sorting[i].id>i) {
-                            to_add.id = i;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        to_add.id = for_sorting.size();
-                    }
-                }*/
+                else if(to_add.color == 2){
+                    yellow_counter++;
+                }
+                else if(to_add.color == 3){
+                    violet_counter++;
+                }
+                else if(to_add.color == 4){
+                    orange_counter++;
+                }
+                else if(to_add.color == 5){
+                    blue_counter++;
+                }
+                else if(to_add.color == 6){
+                    green_counter++;
+                }
+
                 to_add.posX=i;
                 to_add.posY=j;
                 bots.push_back(to_add);
@@ -772,26 +855,27 @@ void MainWindow::make_start_elements(){
                 k--;
             }
             else{
-                Bot to_add(initial_live_cell_energy,max_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
+                Bot to_add(initial_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
 
-                /*if (bots.size() == 0) {
-                    to_add.id = 0;
+                if(to_add.color == 1){
+                    red_counter++;
                 }
-                else {
-                    std::deque<Bot>for_sorting = bots;
-                    quicksort(for_sorting,0,for_sorting.size()-1);
-                    bool found = false;
-                    for (size_t i = 0; i < for_sorting.size(); i++) {
-                        if (for_sorting[i].id>i) {
-                            to_add.id = i;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        to_add.id = for_sorting.size();
-                    }
-                }*/
+                else if(to_add.color == 2){
+                    yellow_counter++;
+                }
+                else if(to_add.color == 3){
+                    violet_counter++;
+                }
+                else if(to_add.color == 4){
+                    orange_counter++;
+                }
+                else if(to_add.color == 5){
+                    blue_counter++;
+                }
+                else if(to_add.color == 6){
+                    green_counter++;
+                }
+
                 to_add.posX=i;
                 to_add.posY=j;
                 bots.push_back(to_add);
@@ -835,26 +919,27 @@ void MainWindow::make_start_elements(){
                 k--;
             }
             else{
-                Bot to_add(initial_live_cell_energy,max_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
+                Bot to_add(initial_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
 
-                /*if (bots.size() == 0) {
-                    to_add.id = 0;
+                if(to_add.color == 1){
+                    red_counter++;
                 }
-                else {
-                    std::deque<Bot>for_sorting = bots;
-                    quicksort(for_sorting,0,for_sorting.size()-1);
-                    bool found = false;
-                    for (size_t i = 0; i < for_sorting.size(); i++) {
-                        if (for_sorting[i].id>i) {
-                            to_add.id = i;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        to_add.id = for_sorting.size();
-                    }
-                }*/
+                else if(to_add.color == 2){
+                    yellow_counter++;
+                }
+                else if(to_add.color == 3){
+                    violet_counter++;
+                }
+                else if(to_add.color == 4){
+                    orange_counter++;
+                }
+                else if(to_add.color == 5){
+                    blue_counter++;
+                }
+                else if(to_add.color == 6){
+                    green_counter++;
+                }
+
                 to_add.posX=i;
                 to_add.posY=j;
                 bots.push_back(to_add);
@@ -895,26 +980,27 @@ void MainWindow::make_start_elements(){
             for(int j=1;j<50;j++){
                 if(elements[i][j]==0){
 
-                    Bot to_add(initial_live_cell_energy,max_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
+                    Bot to_add(initial_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
 
-                    /*if (bots.size() == 0) {
-                        to_add.id = 0;
+                    if(to_add.color == 1){
+                        red_counter++;
                     }
-                    else {
-                        std::deque<Bot>for_sorting = bots;
-                        quicksort(for_sorting,0,for_sorting.size()-1);
-                        bool found = false;
-                        for (size_t i = 0; i < for_sorting.size(); i++) {
-                            if (for_sorting[i].id>i) {
-                                to_add.id = i;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            to_add.id = for_sorting.size();
-                        }
-                    }*/
+                    else if(to_add.color == 2){
+                        yellow_counter++;
+                    }
+                    else if(to_add.color == 3){
+                        violet_counter++;
+                    }
+                    else if(to_add.color == 4){
+                        orange_counter++;
+                    }
+                    else if(to_add.color == 5){
+                        blue_counter++;
+                    }
+                    else if(to_add.color == 6){
+                        green_counter++;
+                    }
+
                     to_add.posX=i;
                     to_add.posY=j;
                     bots.push_back(to_add);
@@ -943,26 +1029,27 @@ void MainWindow::make_start_elements(){
             }
             else{
 
-                Bot to_add(initial_live_cell_energy,max_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
+                Bot to_add(initial_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
 
-                /*if (bots.size() == 0) {
-                    to_add.id = 0;
+                if(to_add.color == 1){
+                    red_counter++;
                 }
-                else {
-                    std::deque<Bot>for_sorting = bots;
-                    quicksort(for_sorting,0,for_sorting.size()-1);
-                    bool found = false;
-                    for (size_t i = 0; i < for_sorting.size(); i++) {
-                        if (for_sorting[i].id>i) {
-                            to_add.id = i;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        to_add.id = for_sorting.size();
-                    }
-                }*/
+                else if(to_add.color == 2){
+                    yellow_counter++;
+                }
+                else if(to_add.color == 3){
+                    violet_counter++;
+                }
+                else if(to_add.color == 4){
+                    orange_counter++;
+                }
+                else if(to_add.color == 5){
+                    blue_counter++;
+                }
+                else if(to_add.color == 6){
+                    green_counter++;
+                }
+
                 to_add.posX=i;
                 to_add.posY=j;
                 bots.push_back(to_add);
@@ -1003,26 +1090,27 @@ void MainWindow::make_start_elements(){
             for(int j=1;j<50;j++){
                 if(elements[i][j]==0){
 
-                    Bot to_add(initial_live_cell_energy,max_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
+                    Bot to_add(initial_live_cell_energy,number_of_gens_of_action,min_energy_for_division);
 
-                    /*if (bots.size() == 0) {
-                        to_add.id = 0;
+                    if(to_add.color == 1){
+                        red_counter++;
                     }
-                    else {
-                        std::deque<Bot>for_sorting = bots;
-                        quicksort(for_sorting,0,for_sorting.size()-1);
-                        bool found = false;
-                        for (size_t i = 0; i < for_sorting.size(); i++) {
-                            if (for_sorting[i].id>i) {
-                                to_add.id = i;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            to_add.id = for_sorting.size();
-                        }
-                    }*/
+                    else if(to_add.color == 2){
+                        yellow_counter++;
+                    }
+                    else if(to_add.color == 3){
+                        violet_counter++;
+                    }
+                    else if(to_add.color == 4){
+                        orange_counter++;
+                    }
+                    else if(to_add.color == 5){
+                        blue_counter++;
+                    }
+                    else if(to_add.color == 6){
+                        green_counter++;
+                    }
+
                     to_add.posX=i;
                     to_add.posY=j;
                     bots.push_back(to_add);
@@ -1042,8 +1130,57 @@ void MainWindow::on_play_clicked()
     }
     else{
         is_action=true;
-        m_timer->start(500);
+        m_timer->start(delay);
     }
 }
 
+void MainWindow::on_Meat_energy_textChanged(const QString &arg1)
+{
+    bool enabled = ui->Meat_energy->hasAcceptableInput();
+    ui->update->setEnabled(enabled);
+    if(!enabled){
+        ui->Meat_energy->setStyleSheet("color: white;  background-color: red");
+    }
+    else{
+        ui->Meat_energy->setStyleSheet("color: black;  background-color: white");
+    }
+}
 
+void MainWindow::on_Plants_energy_textChanged(const QString &arg1)
+{
+    bool enabled = ui->Plants_energy->hasAcceptableInput();
+    ui->update->setEnabled(enabled);
+    if(!enabled){
+        ui->Plants_energy->setStyleSheet("color: white;  background-color: red");
+    }
+    else{
+        ui->Plants_energy->setStyleSheet("color: black;  background-color: white");
+    }
+}
+
+void MainWindow::on_Name_textChanged(const QString &arg1)
+{
+    bool enabled = false;
+    if(ui->Name->text() != ""){
+        enabled = true;
+    }
+    ui->update->setEnabled(enabled);
+    if(!enabled){
+        ui->Name->setStyleSheet("color: white;  background-color: red");
+    }
+    else{
+        ui->Name->setStyleSheet("color: black;  background-color: white");
+    }
+}
+
+void MainWindow::on_update_clicked()
+{
+    this->name = ui->Name->text();
+    this->plants_energy = ui->Plants_energy->text().toInt();
+    this->meat_energy = ui->Meat_energy->text().toInt();
+    this->speed=ui->Speed->value();
+    this->delay = (11-this->speed)*100;
+    this->tree_propagation_speed=ui->Tree_propagation_speed->value();
+    this->on_play_clicked();
+    this->on_play_clicked();
+}

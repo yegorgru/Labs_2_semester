@@ -9,7 +9,6 @@ struct Bot
     int gens_of_irritation[8][7];
     std::vector<std::vector<int>>gens_of_action;
     int energy;
-    int max_energy;
     int counter;
     int posX;
     int posY;
@@ -25,8 +24,8 @@ struct Bot
 
     int superpower;
 
-    //Bot();
-    Bot(int energy,int max_energy,int number_of_gens_of_action,int min_energy_for_division);
+    Bot(){};
+    Bot(int energy,int number_of_gens_of_action,int min_energy_for_division);
     Bot(const Bot& another);
 
     friend bool operator== (const Bot &first, const Bot &second);

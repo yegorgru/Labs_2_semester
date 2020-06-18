@@ -17,16 +17,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     Bots_source.cpp \
+    botinfo.cpp \
     main.cpp \
     mainwindow.cpp \
     worldparameters.cpp
 
 HEADERS += \
     Bots.h \
+    botinfo.h \
     mainwindow.h \
     worldparameters.h
 
 FORMS += \
+    botinfo.ui \
     mainwindow.ui \
     worldparameters.ui
 
