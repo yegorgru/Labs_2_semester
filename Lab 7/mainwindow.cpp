@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon(":/images/drawing.png"));
     name="";
     number_of_live_cells=0;
     initial_live_cell_energy=0;
@@ -34,8 +35,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect (m_timer,&QTimer::timeout,this,&MainWindow::update_scene);
 
     scene=new QGraphicsScene;
-    scene->setSceneRect ( 0,0,900,900 ) ;
+    scene->setSceneRect ( 0,0,900,900 );
 
+
+
+    connect (scene,&QGraphicsScene::selectionChanged, this, &MainWindow::select);
 
     QPixmap wall = QPixmap::fromImage(QImage(part_way+"Wall.png"));
 
@@ -113,9 +117,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->graphicsView->setScene(scene);
 
-    QIntValidator *validator1 = new QIntValidator(1,200,this);
+    validator1 = new QIntValidator(1,200,this);
     ui->Plants_energy->setValidator(validator1);
-    QIntValidator *validator2 = new QIntValidator(1,300,this);
+    validator2 = new QIntValidator(1,300,this);
     ui->Meat_energy->setValidator(validator2);
 
     red_counter = 0 ;
@@ -131,10 +135,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->turns_text->setVisible(false);
     ui->Turns_counter->setVisible(false);
     ui->statistic_information->setVisible(false);
+    ui->without_changes_2->setVisible(false);
 }
 
 MainWindow::~MainWindow()
 {
+    scene->clear();
+    delete scene;
+    delete validator1;
+    delete validator2;
+    delete m_timer;
     delete ui;
 }
 
@@ -164,9 +174,8 @@ void MainWindow::on_pushButton_clicked()
     int reply = msgBox.exec();
 
     if(reply==QMessageBox::Yes){
-
             this->name="Random world";
-            this->number_of_live_cells=1+mersenne()%2000;
+            this->number_of_live_cells=1+mersenne()%1000;
             this->initial_live_cell_energy=1+mersenne()%1000;
             this->number_of_gens_of_action=1+mersenne()%10;
             this->min_energy_for_division=1+mersenne()%600;
@@ -176,12 +185,21 @@ void MainWindow::on_pushButton_clicked()
             this->tree_propagation_speed=1+mersenne()%3;;
             this->speed = 1+mersenne()%10;;
             this->delay = (11-this->speed)*100;
+            this->bots_counter = this->number_of_live_cells;
+            this->trees_counter = this->number_of_plants;
+            this->max_energy =  1+mersenne()%1000;
 
             this->ui->Name->setText(name);
             this->ui->Plants_energy->setText(QString::number(plants_energy));
             this->ui->Meat_energy->setText(QString::number(meat_energy));
             this->ui->Speed->setValue(this->speed);
             this->ui->Tree_propagation_speed->setValue(tree_propagation_speed);
+            ui->number_of_gens->setText(QString::number(this->number_of_gens_of_action));
+            ui->number_of_live->setText(QString::number(this->number_of_live_cells));
+            ui->number_of_plant->setText(QString::number(this->number_of_plants));
+            ui->initial_live->setText(QString::number(this->initial_live_cell_energy));
+            ui->min_energy->setText(QString::number(this->min_energy_for_division));
+            ui->max_live->setText(QString::number(this->max_energy));
             is_action=true;
             if(is_action){
                 for(int i=1;i<49;i++){
@@ -200,6 +218,7 @@ void MainWindow::on_pushButton_clicked()
                 ui->turns_text->setVisible(true);
                 ui->Turns_counter->setVisible(true);
                 ui->statistic_information->setVisible(true);
+                ui->without_changes_2->setVisible(true);
             }
 
     }
@@ -221,12 +240,26 @@ void MainWindow::on_pushButton_clicked()
             this->tree_propagation_speed=Parameters.tree_propagation_speed;
             this->speed = Parameters.speed;
             this->delay = (11-Parameters.speed)*100;
+            this->bots_counter = this->number_of_live_cells;
+            this->trees_counter = this->number_of_plants;
+            this->max_energy=Parameters.max_energy;
 
             this->ui->Name->setText(name);
             this->ui->Plants_energy->setText(QString::number(plants_energy));
             this->ui->Meat_energy->setText(QString::number(meat_energy));
             this->ui->Speed->setValue(Parameters.speed);
             this->ui->Tree_propagation_speed->setValue(tree_propagation_speed);
+            this->ui->Name->setText(name);
+            this->ui->Plants_energy->setText(QString::number(plants_energy));
+            this->ui->Meat_energy->setText(QString::number(meat_energy));
+            this->ui->Speed->setValue(this->speed);
+            this->ui->Tree_propagation_speed->setValue(tree_propagation_speed);
+            ui->number_of_gens->setText(QString::number(this->number_of_gens_of_action));
+            ui->number_of_live->setText(QString::number(this->number_of_live_cells));
+            ui->number_of_plant->setText(QString::number(this->number_of_plants));
+            ui->initial_live->setText(QString::number(this->initial_live_cell_energy));
+            ui->min_energy->setText(QString::number(this->min_energy_for_division));
+            ui->max_live->setText(QString::number(this->max_energy));
             is_action=true;
         }
         else{
@@ -250,6 +283,7 @@ void MainWindow::on_pushButton_clicked()
             ui->turns_text->setVisible(true);
             ui->Turns_counter->setVisible(true);
             ui->statistic_information->setVisible(true);
+            ui->without_changes_2->setVisible(true);
         }
     }
 }
@@ -258,12 +292,33 @@ void MainWindow::update_scene(){
     if(is_action){
         int number_of_new_trees=0;
         if(tree_propagation_speed==1){
-            number_of_new_trees=20;
+            number_of_new_trees=5;
         }
         else if(tree_propagation_speed==2){
-            number_of_new_trees=100;
+            number_of_new_trees=15;
         }
         else if(tree_propagation_speed==3){
+            number_of_new_trees=30;
+        }
+        else if(tree_propagation_speed==4){
+            number_of_new_trees=45;
+        }
+        else if(tree_propagation_speed==5){
+            number_of_new_trees=60;
+        }
+        else if(tree_propagation_speed==6){
+            number_of_new_trees=85;
+        }
+        else if(tree_propagation_speed==7){
+            number_of_new_trees=120;
+        }
+        else if(tree_propagation_speed==8){
+            number_of_new_trees=200;
+        }
+        else if(tree_propagation_speed==9){
+            number_of_new_trees=350;
+        }
+        else{
             number_of_new_trees=500;
         }
         for(int i=0;i<number_of_new_trees;i++){
@@ -276,10 +331,6 @@ void MainWindow::update_scene(){
             }
         }
         for(size_t i=0;i<bots.size();i++){
-            bool is_cur=false;
-            if(current_bot==bots[i]){
-                is_cur = true;
-            }
             if(bots[i].alive==true){
                 bots[i].age++;
                 bots[i].energy--;
@@ -306,16 +357,14 @@ void MainWindow::update_scene(){
                         green_counter--;
                     }
                     bots.erase(bots.begin()+i);
-                    if(i!=bots.size()){
-                         i--;
-                    }
+                    i--;
                 }
                 else{
                     bool go=false;
                     bots[i].view=mersenne()%8;
                     int what_is_ahead;
                     coordinates ahead=get_ahead(what_is_ahead,bots[i]);
-                    if(bots.size()<2000 && bots[i].energy>bots[i].min_energy_for_division-1 && what_is_ahead==1){
+                    if(bots.size()<1000 && bots[i].energy>bots[i].min_energy_for_division-1 && what_is_ahead==1){
                         bots_counter++;
                         bots[i].energy/=2;
                         bots.push_back(bots[i]);
@@ -401,12 +450,18 @@ void MainWindow::update_scene(){
                                 if(bots[i].superpower==3){
                                     bots[i].energy+=meat_energy/5;
                                 }
+                                if(bots[i].energy > max_energy){
+                                    bots[i].energy = max_energy;
+                                }
                                 go=true;
                             }
                             else if(what_is_ahead==3){
                                 bots[i].energy+=plants_energy;
                                 if(bots[i].superpower==2){
                                     bots[i].energy+=plants_energy/5;
+                                }
+                                if(bots[i].energy > max_energy){
+                                    bots[i].energy = max_energy;
                                 }
                                 go=true;
                             }
@@ -420,6 +475,9 @@ void MainWindow::update_scene(){
                                                 if(bots[i].energy-bots[j].energy>bots[i].condition_for_attack-1){
                                                     bots[j].energy-=bots[i].condition_for_attack;
                                                     bots[i].energy+=bots[i].condition_for_attack;
+                                                    if(bots[i].energy > max_energy){
+                                                        bots[i].energy = max_energy;
+                                                    }
                                                     if(bots[j].posX<bots[i].posX){
                                                         if(bots[j].posY<bots[i].posY){
                                                             bots[j].irritation=3;
@@ -458,7 +516,6 @@ void MainWindow::update_scene(){
                                                 else{
                                                     action=attack_fall;
                                                 }
-
                                         }
                                         else{
                                             bots[i].energy-=(bots[i].condition_for_attack/5);
@@ -543,12 +600,7 @@ void MainWindow::update_scene(){
                     green_counter--;
                 }
                 bots.erase(bots.begin()+i);
-                if(i!=bots.size()){
-                     i--;
-                }
-            }
-            if(is_cur){
-                current_bot=bots[i];
+                i--;
             }
         }
         turns++;
@@ -568,27 +620,6 @@ void MainWindow::update_scene(){
 }
 
 void MainWindow::form_scene(){
-    if(scene->selectedItems().size()>0){
-        int x = scene->selectedItems().last()->x()/18;
-        int y = scene->selectedItems().last()->y()/18;
-        bool was = false;
-        for(auto& i:bots){
-            if(i.posX==x && i.posY==y){
-                current_bot=i;
-                was = true;
-                break;
-            }
-        }
-        for(auto& i:scene->selectedItems()){
-            i->setSelected(false);
-        }
-        scene->selectedItems().clear();
-        if(was){
-            botInfo info(current_bot);
-            info.setModal(true);
-            info.exec();
-        }
-    }
     if(changed.size()>0){
         int i;
         int j;
@@ -788,9 +819,6 @@ void MainWindow::make_start_elements(){
             mins=6;
         }
     }
-
-
-
     if(mins==1){
         for(int k=0;k<number_of_live_cells;k++){
             int i=1+mersenne()%49;
@@ -1183,4 +1211,28 @@ void MainWindow::on_update_clicked()
     this->tree_propagation_speed=ui->Tree_propagation_speed->value();
     this->on_play_clicked();
     this->on_play_clicked();
+}
+
+void MainWindow::select(){
+    bool act = is_action;
+    if(act){
+        on_play_clicked();
+    }
+        if(scene->selectedItems().size()>0){
+            int x = scene->selectedItems().first()->x()/18;
+            int y = scene->selectedItems().first()->y()/18;
+            for(auto& i:bots){
+                if(i.posX==x && i.posY==y){
+                    Bot& current_bot=i;
+                    botInfo info(current_bot);
+                    info.setModal(true);
+                    info.exec();
+                    break;
+                }
+            }
+            scene->selectedItems().clear();
+        }
+        if(act){
+            on_play_clicked();
+        }
 }

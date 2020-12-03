@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     Bots_source.cpp \
     botinfo.cpp \
+    choose_gen.cpp \
     main.cpp \
     mainwindow.cpp \
     worldparameters.cpp
@@ -25,11 +26,13 @@ SOURCES += \
 HEADERS += \
     Bots.h \
     botinfo.h \
+    choose_gen.h \
     mainwindow.h \
     worldparameters.h
 
 FORMS += \
     botinfo.ui \
+    choose_gen.ui \
     mainwindow.ui \
     worldparameters.ui
 
@@ -40,3 +43,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     src.qrc
+RC_FILE = myapp.rc

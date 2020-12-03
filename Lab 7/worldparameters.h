@@ -31,6 +31,13 @@ public:
     int meat_energy;
     int tree_propagation_speed;
     int speed;
+    int max_energy;
+
+    QIntValidator *validator1;
+    QIntValidator *validator3;
+    QIntValidator *validator4;
+    QIntValidator *validator6;
+    QIntValidator *validator7;
 
 private slots:
     void on_Number_of_live_cells_textChanged(const QString &arg1);

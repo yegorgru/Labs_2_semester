@@ -17,25 +17,30 @@ WorldParameters::WorldParameters(QWidget *parent) :
     number_of_plants=0;
     plants_energy=0;
     meat_energy=0;
+    max_energy=0;
 
-    QIntValidator *validator1 = new QIntValidator(1,2000,this);
+    validator1 = new QIntValidator(1,1000,this);
     ui->Number_of_live_cells->setValidator(validator1);
-    QIntValidator *validator2 = new QIntValidator(1,1000,this);
-    ui->Initial_live_cell_energy->setValidator(validator2);
-    ui->Max_live_cell_energy->setValidator(validator2);
-    QIntValidator *validator3 = new QIntValidator(2,10,this);
+    ui->Initial_live_cell_energy->setValidator(validator1);
+    ui->Max_live_cell_energy->setValidator(validator1);
+    validator3 = new QIntValidator(2,10,this);
     ui->Number_of_gens_of_action->setValidator(validator3);
-    QIntValidator *validator4 = new QIntValidator(1,600,this);
+    validator4 = new QIntValidator(1,600,this);
     ui->Min_energy_for_division->setValidator(validator4);
     ui->Number_of_plants->setValidator(validator1);
-    QIntValidator *validator6 = new QIntValidator(1,200,this);
+    validator6 = new QIntValidator(1,200,this);
     ui->Plants_energy->setValidator(validator6);
-    QIntValidator *validator7 = new QIntValidator(1,300,this);
+    validator7 = new QIntValidator(1,300,this);
     ui->Meat_energy->setValidator(validator7);
 }
 
 WorldParameters::~WorldParameters()
 {
+    delete validator1;
+    delete validator3;
+    delete validator4;
+    delete validator6;
+    delete validator7;
     delete ui;
 }
 
@@ -149,6 +154,7 @@ void WorldParameters::on_Start_clicked()
     this->meat_energy=ui->Meat_energy->text().toInt();
     this->speed=ui->Speed->value();
     this->tree_propagation_speed=ui->Tree_propagation_speed->value();
+    this->max_energy=ui->Max_live_cell_energy->text().toInt();
     this->close();
 }
 

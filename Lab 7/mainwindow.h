@@ -59,6 +59,8 @@ private slots:
 
     void on_update_clicked();
 
+    void select();
+
 private:
     Ui::MainWindow *ui;
 
@@ -87,6 +89,7 @@ private:
 
     int number_of_live_cells;
     int initial_live_cell_energy;
+    int max_energy;
     int number_of_gens_of_action;
     int min_energy_for_division;
     int number_of_plants;
@@ -113,6 +116,9 @@ private:
     unsigned short int elements[50][50]={};
     QGraphicsPixmapItem* items[50][50];
     std::vector<coordinates>changed;
+
+    QIntValidator *validator1;
+    QIntValidator *validator2;
 
     QPixmap RedT;
     QPixmap RedTR;
